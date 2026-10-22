@@ -429,6 +429,12 @@
         <li><a href="#verdict">結論：誰較困難</a></li>
       </ol>
     </div>
+    <div class="toc-group">
+      <p class="toc-label">互動</p>
+      <ol>
+        <li><a href="./tests.html">MIL-STD-1275F 測試實驗室 →</a></li>
+      </ol>
+    </div>
   </nav>
 
   <main>
@@ -443,7 +449,7 @@
       <p>架構必須結合「主動前端保護級」與「升壓型（Boost 或隔離式全橋/半橋）轉換器級」。</p>
       <div class="callout">
         <div class="callout-label">規範版本</div>
-        <p style="margin:0; font-size:0.9rem;">本頁數值以現行版 <strong>MIL-STD-1275F（2022-09-07）</strong> 原文為準。初版（2026-08-28）依 E 版二手資料撰寫，2026-10-22 已校正尖峰能量、反接測試、冷車持續時間、突波源阻抗等數值。</p>
+        <p style="margin:0; font-size:0.9rem;">本頁數值以現行版 <strong>MIL-STD-1275F（2022-09-07）</strong> 原文為準。初版（2026-08-28）依 E 版二手資料撰寫，2026-10-22 已校正尖峰能量、反接測試、冷車持續時間、突波測試條件等數值。每一項測試的波形與判定，可以到 <a href="./tests.html">MIL-STD-1275F 測試實驗室</a> 互動試算。</p>
       </div>
     </section>
 
@@ -534,7 +540,7 @@
       </div>
       <div class="callout tint">
         <div class="callout-label">對照 1275F 測試條件</div>
-        <p style="margin:0;">MIL-STD-1275F Table II：V<sub>NOM</sub> 30V、V<sub>PEAK</sub> 100V、上升 1–10ms、源阻抗 <strong>500mΩ</strong>、<strong>5 發，間隔 5 秒</strong>。463W 假設 100V 是理想電壓源；7.24A 在 500mΩ 上會掉約 3.6V，實際功耗約 437W，原算法偏保守。真正要多算的是 5 發連續造成的累積溫升。</p>
+        <p style="margin:0;">MIL-STD-1275F Table II：V<sub>NOM</sub> 30V、V<sub>PEAK</sub> 100V（-0/+10）、上升 1–10ms、<strong>5 發，間隔 5 秒</strong>。表上寫的源阻抗 500mΩ，在 Figure 12 電路中是串在 30V 正常電源那一路；突波前 50ms 由 0.2F 電容經固態開關直接送出（路徑電阻 &lt; 50mΩ），所以 463W 的算法成立。若車上電源真的照 Figure 8 包絡從 100V 線性降到 33V，箝制時間會拉長到約 480ms、每發約 120J，風險轉為 MOSFET 的長時間 SOA。（依原文電路圖推算）<br><a href="./tests.html#surge">到測試實驗室調參數試算 →</a></p>
       </div>
       <h3>解決方案</h3>
       <ol class="plain">
@@ -702,7 +708,7 @@
             <tr><td>標稱電壓</td><td>28V</td><td>12V 或 24V</td><td class="verdict">1275</td></tr>
             <tr><td>穩態電壓範圍</td><td>20~33V（含漣波；1275F 上限 33V）；可承受注入漣波 4Vpp、30Hz~5kHz</td><td>約9~16V（12V系統）</td><td class="verdict">1275</td></tr>
             <tr><td>啟動/冷車電壓凹陷</td><td>1275F：初始嚙合 IES 最低 12V、最長 1 秒；冷車最低 16V、最長 30 秒</td><td>Pulse 4：12V系統可降至約4.5~6V，通常伴隨明確恢復斜率曲線</td><td class="verdict">各有嚴苛點</td></tr>
-            <tr><td>突波（Surge）</td><td>+100V／50ms，源阻抗 500mΩ，5 發間隔 5 秒（1275F Table II）</td><td>Pulse 5 Load Dump：未抑制可達35~100V+，持續40~400ms，ISO 7637中能量最高</td><td class="verdict">相近量級</td></tr>
+            <tr><td>突波（Surge）</td><td>+100V／50ms，包絡線性降到 500ms 時 33V；測試 5 發間隔 5 秒（1275F Figure 8、Table II）</td><td>Pulse 5 Load Dump：未抑制可達35~100V+，持續40~400ms，ISO 7637中能量最高</td><td class="verdict">相近量級</td></tr>
             <tr><td>尖峰（Spike）</td><td>±250V，上升 ≤50ns，振盪 20~500kHz，單發 ≤200mJ，各極性至少 50 發</td><td>Pulse 1/2a/2b/3a/3b：多在±50~150V範圍</td><td class="verdict">1275較嚴苛</td></tr>
             <tr><td>反向極性</td><td>反接 33VDC 持續 5 分鐘，反接電流 ≤ 正常工作電流，接回後須正常運作</td><td>Pulse 1 為感性負載斷開的負向瞬態，非全反向電池情境</td><td class="verdict">1275更真實</td></tr>
             <tr><td>EMI/傳導發射</td><td>另有MIL-STD-461（CE102等），通常與1275併行要求</td><td>另有CISPR 25 / ISO 11452系列</td><td class="verdict">461更嚴</td></tr>

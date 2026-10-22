@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MIL-STD-1275F 測試實驗室</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ink: #1C1D1F;
+    --ink-muted: #5B5E61;
+    --ink-faint: #7E8184;
+    --surface: #FFFFFF;
+    --surface-subtle: #F4F4F3;
+    --surface-raised: #FBFBFA;
+    --line: #DEDDDA;
+    --accent: #D74B00;
+    --accent-strong: #E94709;
+    --accent-on: #FFFFFF;
+    --accent-tint: #FDEEE4;
+    --mask: rgba(215, 75, 0, 0.10);
+    --ok: #1B7A3D;
+    --ok-tint: #E6F3EA;
+    --bad: #B42318;
+    --bad-tint: #FCE9E6;
+    --band-bg: #1C1D1F;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ECEDEE; --ink-muted: #A7ABAE; --ink-faint: #8A8E91;
+      --surface: #18191B; --surface-subtle: #221F1D; --surface-raised: #1E1C1B;
+      --line: #36322F; --accent: #FF7A33; --accent-strong: #FF6B3D; --accent-on: #1C1D1F;
+      --accent-tint: #2E211A; --mask: rgba(255, 122, 51, 0.13);
+      --ok: #5BC888; --ok-tint: #17291E; --bad: #FF7B6E; --bad-tint: #33201D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ECEDEE; --ink-muted: #A7ABAE; --ink-faint: #8A8E91;
+    --surface: #18191B; --surface-subtle: #221F1D; --surface-raised: #1E1C1B;
+    --line: #36322F; --accent: #FF7A33; --accent-strong: #FF6B3D; --accent-on: #1C1D1F;
+    --accent-tint: #2E211A; --mask: rgba(255, 122, 51, 0.13);
+    --ok: #5BC888; --ok-tint: #17291E; --bad: #FF7B6E; --bad-tint: #33201D;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--surface); color: var(--ink);
+    font-family: "Noto Sans TC", "Segoe UI", system-ui, sans-serif;
+    font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: "Noto Serif TC", "Segoe UI", serif; font-weight: 700; text-wrap: balance; margin: 0; }
+  .mono, .num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .en { display: block; font-size: 0.82em; color: var(--ink-muted); font-weight: 400; line-height: 1.45; }
+  h1 .en, h2 .en { font-family: "Noto Sans TC", sans-serif; font-weight: 500; letter-spacing: 0.01em; }
+  p .en, li .en { margin-top: 0.15rem; }
+
+  /* ---------- masthead ---------- */
+  .masthead { background: var(--band-bg); color: #F2EFEC; padding: 2.4rem 1.25rem 2rem; }
+  .masthead-inner { max-width: 1120px; margin: 0 auto; }
+  .back { display: inline-block; font-size: 0.85rem; color: #FF9A5C; text-decoration: none; margin-bottom: 1.1rem; }
+  .back:hover { text-decoration: underline; }
+  .masthead h1 { color: #FBF8F5; font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.25; }
+  .masthead h1 .en { color: #B9B5B0; font-size: 0.5em; margin-top: 0.35rem; }
+  .masthead .lede { color: #C9C6C2; max-width: 70ch; margin: 1rem 0 0; font-size: 0.98rem; }
+  .masthead .lede .en { color: #9C9894; }
+  .src-note { margin-top: 1rem; font-size: 0.8rem; color: #9C9894; font-family: "IBM Plex Mono", monospace; }
+
+  /* ---------- tabs ---------- */
+  .tabbar-wrap { border-bottom: 1px solid var(--line); background: var(--surface); position: sticky; top: 0; z-index: 5; }
+  .tabbar { max-width: 1120px; margin: 0 auto; display: flex; overflow-x: auto; padding: 0 1.25rem; gap: 0.25rem; }
+  .tab {
+    appearance: none; border: 0; background: none; cursor: pointer; color: var(--ink-muted);
+    font: inherit; font-size: 0.92rem; font-weight: 600; text-align: left;
+    padding: 0.85rem 0.9rem 0.75rem; border-bottom: 3px solid transparent; white-space: nowrap;
+  }
+  .tab .en { font-size: 0.74rem; font-weight: 500; }
+  .tab .clause { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; color: var(--ink-faint); margin-right: 0.35rem; }
+  .tab:hover { color: var(--ink); }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+  /* ---------- panels ---------- */
+  main { max-width: 1120px; margin: 0 auto; padding: 1.8rem 1.25rem 3rem; }
+  .panel[hidden] { display: none; }
+  .panel-head { max-width: 76ch; margin-bottom: 1.3rem; }
+  .panel-head h2 { font-size: 1.55rem; line-height: 1.3; }
+  .panel-head h2 .en { font-size: 0.6em; margin-top: 0.2rem; }
+  .panel-head p { margin: 0.8rem 0 0; color: var(--ink-muted); }
+  .panel-head p .en { color: var(--ink-faint); }
+
+  .bench { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 1.4rem; align-items: start; }
+  @media (max-width: 880px) { .bench { grid-template-columns: 1fr; } }
+
+  .scope { background: var(--surface-raised); border: 1px solid var(--line); border-radius: 6px; padding: 0.7rem 0.7rem 0.4rem; }
+  .scope canvas { display: block; width: 100%; height: 340px; }
+  .scope.short canvas { height: 230px; }
+  .scope + .scope { margin-top: 0.9rem; }
+  .scope-cap { display: flex; flex-wrap: wrap; gap: 0.3rem 1.1rem; font-size: 0.78rem; color: var(--ink-muted); padding: 0.35rem 0.3rem 0.2rem; }
+  .key { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .key i { display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--accent); }
+  .key i.src { border-top-color: var(--ink-faint); }
+  .key i.dash { border-top: 2px dashed var(--ink-muted); }
+  .key i.zone { height: 10px; border: 0; background: var(--mask); }
+  .key i.out { border-top-color: var(--ink); }
+  .key i.heat { height: 10px; border: 0; background: var(--accent); opacity: 0.35; }
+
+  .side { display: flex; flex-direction: column; gap: 1rem; }
+  .ctrl-group { display: flex; flex-direction: column; gap: 0.85rem; }
+  .ctrl label { display: flex; justify-content: space-between; gap: 0.6rem; font-size: 0.86rem; font-weight: 600; }
+  .ctrl label .en { display: inline; font-size: 0.75rem; margin-left: 0.3rem; }
+  .ctrl output { font-family: "IBM Plex Mono", monospace; font-weight: 600; color: var(--accent); white-space: nowrap; }
+  .ctrl input[type=range] { width: 100%; accent-color: var(--accent); margin: 0.3rem 0 0; }
+  .ctrl .hint { font-size: 0.74rem; color: var(--ink-faint); margin-top: 0.15rem; }
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .seg button { flex: 1; appearance: none; border: 0; background: var(--surface); color: var(--ink-muted); font: inherit; font-size: 0.8rem; font-weight: 600; padding: 0.45rem 0.4rem; cursor: pointer; line-height: 1.35; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-on); }
+  .seg button .en { font-size: 0.7rem; color: inherit; opacity: 0.8; }
+  .btn { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 0.82rem; font-weight: 600; padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .readout { border-top: 1px solid var(--line); padding-top: 0.8rem; }
+  .readout dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 0.8rem; font-size: 0.84rem; }
+  .readout dt { color: var(--ink-muted); }
+  .readout dt .en { display: inline; font-size: 0.72rem; margin-left: 0.25rem; }
+  .readout dd { margin: 0; text-align: right; font-family: "IBM Plex Mono", monospace; font-weight: 600; }
+
+  .verdict { border-radius: 6px; padding: 0.75rem 0.9rem; font-size: 0.88rem; font-weight: 600; }
+  .verdict .en { font-weight: 500; color: inherit; opacity: 0.85; }
+  .verdict.pass { background: var(--ok-tint); color: var(--ok); }
+  .verdict.fail { background: var(--bad-tint); color: var(--bad); }
+  .verdict .tag { font-family: "IBM Plex Mono", monospace; letter-spacing: 0.04em; margin-right: 0.4rem; }
+
+  .notes { margin-top: 2rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.6rem 2.2rem; }
+  @media (max-width: 880px) { .notes { grid-template-columns: 1fr; } }
+  .notes h3 { font-size: 1.05rem; margin-bottom: 0.6rem; }
+  .notes h3 .en { font-size: 0.75em; }
+  .notes ul { margin: 0; padding-left: 1.15rem; }
+  .notes li { margin-bottom: 0.55rem; font-size: 0.9rem; }
+  .ai { font-size: 0.72rem; font-weight: 600; color: var(--accent); white-space: nowrap; }
+
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.84rem; min-width: 460px; }
+  th, td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--band-bg); color: #F2EFEC; font-weight: 600; font-size: 0.78rem; }
+  td.num { white-space: nowrap; }
+  tr.now td { background: var(--accent-tint); }
+
+  details.fig { margin-top: 1.4rem; border-top: 1px solid var(--line); padding-top: 0.9rem; }
+  details.fig summary { cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+  details.fig summary .en { display: inline; font-size: 0.78rem; margin-left: 0.4rem; }
+  details.fig img { display: block; max-width: 100%; height: auto; margin-top: 0.8rem; background: #fff; border: 1px solid var(--line); border-radius: 4px; }
+  details.fig figcaption { font-size: 0.78rem; color: var(--ink-faint); margin-top: 0.35rem; }
+
+  .common { margin-top: 3rem; border-top: 1px solid var(--line); padding-top: 1.6rem; }
+  .common h2 { font-size: 1.2rem; margin-bottom: 0.8rem; }
+  .common h2 .en { font-size: 0.7em; }
+
+  svg.setup { width: 100%; height: auto; display: block; }
+  svg.setup text { font-family: "IBM Plex Mono", monospace; font-size: 12px; fill: var(--ink); }
+  svg.setup .box { fill: var(--surface); stroke: var(--ink-muted); stroke-width: 1.5; }
+  svg.setup .lisn { fill: var(--accent-tint); stroke: var(--accent); stroke-width: 1.5; }
+  svg.setup .wire { fill: none; stroke: var(--ink-muted); stroke-width: 1.5; }
+  svg.setup .gnd { fill: none; stroke: var(--ink-faint); stroke-width: 6; }
+
+  footer { max-width: 1120px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; font-size: 0.78rem; color: var(--ink-faint); border-top: 1px solid var(--line); }
+  footer p { margin: 0 0 0.4rem; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="back" href="./index.html">← 回到 54V/240W 設計指南　Back to the design guide</a>
+    <h1>MIL-STD-1275F 測試實驗室<span class="en">MIL-STD-1275F Test Lab — 28 VDC power input tests, hands-on</span></h1>
+    <p class="lede">把規範的每一項電源測試畫成示波器畫面：橘色線是送進設備的波形，淡橘區是規範判定「可能損壞或無法運作」的範圍。調整本案參數，看設備會不會通過。
+      <span class="en">Each power-input test of the standard as a scope trace. The orange trace is what reaches the equipment; the shaded zone is where the standard says equipment may be damaged or inoperable. Change the design values and see whether it passes.</span></p>
+    <p class="src-note">依據 MIL-STD-1275F (AT), 07 Sep 2022 · Distribution A · 圖表數值取自原文 Figure 6–12、Table I–II</p>
+  </div>
+</header>
+
+<div class="tabbar-wrap">
+  <div class="tabbar" role="tablist" aria-label="測試項目 Test items">
+    <button class="tab" role="tab" id="tab-steady" aria-controls="p-steady" aria-selected="true"><span class="clause">5.1.1</span>穩態與漣波<span class="en">Steady state &amp; ripple</span></button>
+    <button class="tab" role="tab" id="tab-start" aria-controls="p-start" aria-selected="false" tabindex="-1"><span class="clause">5.1.2</span>啟動事件<span class="en">Starting event</span></button>
+    <button class="tab" role="tab" id="tab-spike" aria-controls="p-spike" aria-selected="false" tabindex="-1"><span class="clause">5.1.3.1</span>電壓尖峰<span class="en">Voltage spikes</span></button>
+    <button class="tab" role="tab" id="tab-surge" aria-controls="p-surge" aria-selected="false" tabindex="-1"><span class="clause">5.1.3.2</span>電壓突波<span class="en">Voltage surges</span></button>
+    <button class="tab" role="tab" id="tab-rev" aria-controls="p-rev" aria-selected="false" tabindex="-1"><span class="clause">4.1</span>反接與測試架構<span class="en">Reverse polarity &amp; setup</span></button>
+  </div>
+</div>
+
+<main>
+
+<!-- ================= 1. Steady state & ripple ================= -->
+<section class="panel" id="p-steady" role="tabpanel" aria-labelledby="tab-steady">
+  <div class="panel-head">
+    <h2>穩態電壓與漣波<span class="en">Steady-state voltage and ripple</span></h2>
+    <p>設備要在 20–33 V（含漣波）之間正常運作，還要承受疊加在直流上的 ±2 V（4 Vpp）、30 Hz–5 kHz 漣波。注入測試依 MIL-STD-461 CS101 方法，在 22 V 與 31 V 兩個點做。
+      <span class="en">Equipment must work from 20 V to 33 V including ripple, and tolerate ±2 V (4 Vpp) ripple from 30 Hz to 5 kHz. Injection follows the MIL-STD-461 CS101 method at 22 V and 31 V.</span></p>
+  </div>
+  <div class="bench">
+    <div>
+      <div class="scope"><canvas id="cv-steady" aria-label="穩態與漣波波形"></canvas>
+        <div class="scope-cap"><span class="key"><i></i>EUT 輸入電壓 Input voltage</span><span class="key"><i class="zone"></i>超出操作範圍 Outside 20–33 V</span></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="ctrl-group">
+        <div class="ctrl"><label for="st-v">直流電壓<span class="en">DC level</span><output id="st-v-o"></output></label><input type="range" id="st-v" min="16" max="36" step="0.5" value="22"></div>
+        <div class="ctrl"><label for="st-r">注入漣波<span class="en">Ripple (p-p)</span><output id="st-r-o"></output></label><input type="range" id="st-r" min="0" max="6" step="0.5" value="4"><div class="hint">規範值 4 Vpp · Spec 4 Vpp</div></div>
+        <div class="ctrl"><label for="st-f">漣波頻率<span class="en">Ripple frequency</span><output id="st-f-o"></output></label><input type="range" id="st-f" min="0" max="2" step="1" value="1"><div class="hint">30 Hz · 400 Hz · 5 kHz</div></div>
+        <div class="btn-row"><button class="btn" data-st="22">CS101 測試點 22 V</button><button class="btn" data-st="31">CS101 測試點 31 V</button></div>
+      </div>
+      <div class="readout"><dl>
+        <dt>最高<span class="en">Max</span></dt><dd id="st-max"></dd>
+        <dt>最低<span class="en">Min</span></dt><dd id="st-min"></dd>
+      </dl></div>
+      <div class="verdict" id="st-verdict"></div>
+      <div class="ctrl"><label for="st-e">本機發出漣波<span class="en">Emitted ripple</span><output id="st-e-o"></output></label><input type="range" id="st-e" min="0" max="4" step="0.1" value="0.6"><div class="hint">上限 2 Vpp，30 Hz–1 kHz · Limit 2 Vpp</div></div>
+      <div class="verdict" id="st-e-verdict"></div>
+    </div>
+  </div>
+  <div class="notes">
+    <div>
+      <h3>規範怎麼說<span class="en">What the standard requires</span></h3>
+      <ul>
+        <li>上限 33 VDC 含漣波；下限依 Figure 8，即 20 V（5.1.1.1）。<span class="en">Upper limit 33 VDC including ripple; lower limit per Figure 8 (20 V).</span></li>
+        <li>注入漣波 ±2 V、30 Hz–5 kHz，超出此頻段不算漣波（5.1.1.2.1）。<span class="en">Injected ripple ±2 V, 30 Hz–5 kHz.</span></li>
+        <li>發出漣波須小於 ±1 V（2 Vpp）、30 Hz–1 kHz；最小與最大負載各操作至少 10 秒，用示波器 FFT 量測（5.1.1.2.2、5.3.1.2.2）。<span class="en">Emitted ripple below 2 Vpp, 30 Hz–1 kHz; each load condition for at least 10 s, measured by scope FFT.</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3>對本案的意義<span class="en">What it means for this design</span></h3>
+      <ul>
+        <li>22 V ± 2 V 剛好碰到 20 V 下限，31 V ± 2 V 剛好碰到 33 V 上限——兩個測試點就是把漣波推到範圍邊緣。<span class="ai">AI 觀察</span><span class="en">22 V ± 2 V touches the 20 V floor and 31 V ± 2 V touches the 33 V ceiling: both test points push ripple to the edge.</span></li>
+        <li>升壓級在 20 V 低點時工作週期最大，30 Hz–5 kHz 的輸入擾動最容易穿透迴授環路，要確認控制迴路在低頻有足夠增益。<span class="ai">AI 推論</span><span class="en">At the 20 V corner the boost stage runs at its highest duty cycle; check loop gain at 30 Hz–5 kHz.</span></li>
+      </ul>
+    </div>
+  </div>
+  <details class="fig"><summary>原文測試電路：發出漣波量測<span class="en">Figure 9 — emitted ripple test circuit</span></summary>
+    <figure><img src="figs/1275F_fig09_ripple-emission-circuit.png" alt="MIL-STD-1275F Figure 9 發出漣波測試電路" loading="lazy"><figcaption>MIL-STD-1275F Figure 9。30 mΩ 模擬源阻抗＋5 µH LISN，示波器 FFT 搭配高壓差動探棒。</figcaption></figure>
+  </details>
+</section>
+
+<!-- ================= 2. Starting event ================= -->
+<section class="panel" id="p-start" role="tabpanel" aria-labelledby="tab-start" hidden>
+  <div class="panel-head">
+    <h2>啟動事件：初始嚙合與冷車<span class="en">Starting event: initial engagement and cranking</span></h2>
+    <p>引擎啟動時，起動馬達嚙合瞬間電壓最低掉到 12 V（最長 1 秒），接著冷車期間維持在 16 V 以上、最長 30 秒。設備必須全程正常運作。用本案的負載功率、效率與 UVLO 設定，看每一段的電流和會不會斷電。
+      <span class="en">During engine start the bus can drop to 12 V for up to 1 s at starter engagement, then sit at 16 V or above for up to 30 s of cranking. Equipment must keep working throughout.</span></p>
+  </div>
+  <div class="bench">
+    <div>
+      <div class="scope"><canvas id="cv-start" aria-label="啟動事件波形"></canvas>
+        <div class="scope-cap"><span class="key"><i></i>EUT 輸入電壓 Input voltage</span><span class="key"><i class="dash"></i>UVLO 門檻 UVLO threshold</span><span class="key"><i class="zone"></i>高於 33 V Above 33 V</span></div>
+      </div>
+      <div class="btn-row" style="margin-top:0.8rem">
+        <div class="seg" style="flex:1;min-width:260px" role="group" aria-label="顯示">
+          <button id="sv-fig" aria-pressed="true">Figure 6 規範包絡<span class="en">Requirement envelope</span></button>
+          <button id="sv-tbl" aria-pressed="false">Table I 測試序列<span class="en">Test sequence</span></button>
+        </div>
+        <button class="btn" id="sv-play">▶ 播放序列　Play</button>
+      </div>
+    </div>
+    <div class="side">
+      <div class="ctrl-group">
+        <div class="ctrl"><label for="sv-p">負載功率<span class="en">Load power</span><output id="sv-p-o"></output></label><input type="range" id="sv-p" min="50" max="400" step="10" value="240"></div>
+        <div class="ctrl"><label for="sv-eff">轉換效率<span class="en">Efficiency</span><output id="sv-eff-o"></output></label><input type="range" id="sv-eff" min="0.75" max="0.97" step="0.01" value="0.85"><div class="hint">低壓輸入時效率較差 · Lower at low input</div></div>
+        <div class="ctrl"><label for="sv-uvlo">UVLO 門檻<span class="en">UVLO threshold</span><output id="sv-uvlo-o"></output></label><input type="range" id="sv-uvlo" min="6" max="20" step="0.5" value="8"></div>
+        <div class="ctrl"><label for="sv-r">輸入路徑電阻<span class="en">Input path R</span><output id="sv-r-o"></output></label><input type="range" id="sv-r" min="1" max="30" step="0.5" value="5"><div class="hint">理想二極體＋突波 MOSFET＋走線 · Ideal diode + pass FET + copper</div></div>
+      </div>
+      <div class="readout"><dl>
+        <dt>20 V 時電流<span class="en">at 20 V</span></dt><dd id="sv-i20"></dd>
+        <dt>12 V 嚙合電流<span class="en">at 12 V IES</span></dt><dd id="sv-i12"></dd>
+        <dt>16 V 冷車電流<span class="en">at 16 V crank</span></dt><dd id="sv-i16"></dd>
+        <dt>冷車路徑損耗<span class="en">Path loss</span></dt><dd id="sv-pl"></dd>
+        <dt>30 秒累積熱量<span class="en">Heat over 30 s</span></dt><dd id="sv-e"></dd>
+      </dl></div>
+      <div class="verdict" id="sv-verdict"></div>
+    </div>
+  </div>
+  <div class="notes">
+    <div>
+      <h3>Table I 測試序列<span class="en">Table I test sequence</span></h3>
+      <div class="tbl-wrap"><table id="sv-table">
+        <thead><tr><th>事件 Event</th><th>電壓 Voltage</th><th>持續 Duration</th></tr></thead>
+        <tbody>
+          <tr data-i="0"><td>1</td><td class="num">20 V (-1/+0)</td><td class="num">1 s (-0/+0.1)</td></tr>
+          <tr data-i="1"><td>2 · IES</td><td class="num">12 V (-1/+0)</td><td class="num">1 s (-0/+0.1)</td></tr>
+          <tr data-i="2"><td>3</td><td class="num">20 V</td><td class="num">1 s</td></tr>
+          <tr data-i="3"><td>4 · IES</td><td class="num">12 V</td><td class="num">1 s</td></tr>
+          <tr data-i="4"><td>5</td><td class="num">20 V</td><td class="num">1 s</td></tr>
+          <tr data-i="5"><td>6 · IES</td><td class="num">12 V</td><td class="num">1 s</td></tr>
+          <tr data-i="6"><td>6 · 冷車 Crank</td><td class="num">16 V (-1/+0)</td><td class="num">30 s (-0.1/+0)</td></tr>
+        </tbody>
+      </table></div>
+      <p style="font-size:0.82rem;color:var(--ink-muted);margin:0.6rem 0 0">注意電壓容差是 -1/+0：實際測試可能壓到 11 V 與 15 V。<span class="en">Tolerances are -1/+0, so the test may go as low as 11 V and 15 V.</span></p>
+    </div>
+    <div>
+      <h3>對本案的意義<span class="en">What it means for this design</span></h3>
+      <ul>
+        <li>原設計以 10 V 算峰值電流 28.2 A，已涵蓋規範 12 V（含 -1 V 容差為 11 V）的嚙合突降。<span class="en">The original 10 V basis (28.2 A) already covers the 12 V IES, even with its -1 V tolerance.</span></li>
+        <li>真正決定散熱的是 16 V（容差下 15 V）持續 30 秒：這段電流接近穩態，熱有時間傳到外殼，要用穩態熱阻評估。<span class="ai">AI 推論</span><span class="en">The 30 s crank at 16 V (15 V with tolerance) sets the thermal design: long enough to reach case temperature.</span></li>
+        <li>UVLO 必須低於 11 V，還要留遲滯：若 UVLO 上升門檻高於 16 V，嚙合結束後回不去，設備會一直關著。<span class="ai">AI 推論</span><span class="en">UVLO must sit below 11 V with hysteresis whose rising threshold stays under 16 V.</span></li>
+      </ul>
+    </div>
+  </div>
+  <details class="fig"><summary>原文 Figure 6<span class="en">Starting disturbance limits</span></summary>
+    <figure><img src="figs/1275F_fig06_starting-limits.png" alt="MIL-STD-1275F Figure 6 啟動干擾限制" loading="lazy"><figcaption>MIL-STD-1275F Figure 6。實線含漣波電壓。</figcaption></figure>
+  </details>
+</section>
+
+<!-- ================= 3. Spikes ================= -->
+<section class="panel" id="p-spike" role="tabpanel" aria-labelledby="tab-spike" hidden>
+  <div class="panel-head">
+    <h2>電壓尖峰：250 V、1 ms 以內<span class="en">Voltage spikes: 250 V, under 1 ms</span></h2>
+    <p>尖峰來自線束與感性負載切換，是持續 1 ms 以內、能量有限的阻尼振盪。測試由 8.2 µF 電容充到 ±250 V，經固態開關打進 LISN 與設備，正負極性各至少 50 發、間隔 1 秒。
+      <span class="en">Spikes come from harness interaction and switching reactive loads: energy-limited, damped oscillations under 1 ms. The test dumps an 8.2 µF capacitor charged to ±250 V into the LISN and equipment, at least 50 shots per polarity, 1 s apart.</span></p>
+  </div>
+  <div class="bench">
+    <div>
+      <div class="scope"><canvas id="cv-spike" aria-label="尖峰波形與包絡"></canvas>
+        <div class="scope-cap"><span class="key"><i></i>注入尖峰 Injected spike</span><span class="key"><i class="zone"></i>Figure 7 損壞區 Damage zone</span></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="ctrl-group">
+        <div class="seg" role="group" aria-label="極性 Polarity"><button id="sp-pos" aria-pressed="true">正極性<span class="en">+250 V</span></button><button id="sp-neg" aria-pressed="false">負極性<span class="en">−250 V</span></button></div>
+        <div class="ctrl"><label for="sp-f">振盪頻率<span class="en">Ring frequency</span><output id="sp-f-o"></output></label><input type="range" id="sp-f" min="20" max="500" step="1" value="25"><div class="hint">規範 20–500 kHz · Spec range</div></div>
+        <div class="ctrl"><label for="sp-tau">衰減時間常數<span class="en">Decay τ</span><output id="sp-tau-o"></output></label><input type="range" id="sp-tau" min="10" max="900" step="5" value="120"><div class="hint">由設備輸入阻抗決定 · Set by EUT input impedance</div></div>
+      </div>
+      <div class="readout"><dl>
+        <dt>LISN 5 µH × 8.2 µF 諧振<span class="en">Natural f</span></dt><dd id="sp-fn"></dd>
+        <dt>電容儲能 ½CV²<span class="en">Stored energy</span></dt><dd id="sp-ec"></dd>
+        <dt>規範單發上限<span class="en">Spec max</span></dt><dd>200 mJ</dd>
+        <dt>測試總發數<span class="en">Total shots</span></dt><dd>≥ 100</dd>
+      </dl></div>
+      <div class="verdict" id="sp-verdict"></div>
+    </div>
+  </div>
+  <div class="notes">
+    <div>
+      <h3>規範怎麼說<span class="en">What the standard requires</span></h3>
+      <ul>
+        <li>Figure 7：正向包絡 250 V 維持 70 µs，1 ms 時降到 100 V；負向包絡 −250 V 維持 70 µs，1 ms 時回升到 <strong>+18 V</strong>。<span class="en">Positive envelope 250 V for 70 µs, down to 100 V at 1 ms; negative envelope −250 V for 70 µs, back up to +18 V at 1 ms.</span></li>
+        <li>注入尖峰上升時間 ≤ 50 ns，單發總能量 ≤ 200 mJ（5.1.3.1.1）。<span class="en">Rise time ≤ 50 ns, energy per spike ≤ 200 mJ.</span></li>
+        <li>在最差負載下測；最差負載不明時至少測最小與最大負載（5.3.3.1.1）。<span class="en">Test at worst-case load, or at least at minimum and maximum load.</span></li>
+        <li>設備自己發出的尖峰要依 ISO 7637-2 方法量，每個切換功能至少 32 次，單一事件 &lt; 125 mJ（5.3.3.1.2）。<span class="en">Emitted spikes: ISO 7637-2 method, 32 operations per switching function, under 125 mJ per event.</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3>對本案的意義<span class="en">What it means for this design</span></h3>
+      <ul>
+        <li>8.2 µF 充到 250 V 儲存約 256 mJ，比 200 mJ 上限多——實際送進設備的能量由 LISN 與設備阻抗分走一部分。<span class="ai">AI 推算</span><span class="en">8.2 µF at 250 V stores about 256 mJ; the LISN and EUT impedance share what actually reaches the equipment.</span></li>
+        <li>5 µH 與 8.2 µF 的諧振約 25 kHz，落在規範 20–500 kHz 的低端；設備輸入電容越大，頻率越低、衰減越慢。<span class="ai">AI 推算</span><span class="en">5 µH with 8.2 µF rings near 25 kHz, at the low end of the band; more input capacitance lowers it further.</span></li>
+        <li>前端 TVS 要能吸收 200 mJ 等級、重複 50 次的能量，箝位電壓還要低於突波抑制器 MOSFET 的 V<sub>DS</sub> 額定（100 V 元件很吃緊）。<span class="ai">AI 推論</span><span class="en">The front-end TVS must absorb ~200 mJ fifty times and clamp below the pass FET's V<sub>DS</sub> rating.</span></li>
+      </ul>
+    </div>
+  </div>
+  <details class="fig"><summary>原文測試電路：尖峰注入<span class="en">Figure 10 — spike injection circuit</span></summary>
+    <figure><img src="figs/1275F_fig10_spike-injection-circuit.png" alt="MIL-STD-1275F Figure 10 尖峰注入測試電路" loading="lazy"><figcaption>MIL-STD-1275F Figure 10。±250 V 經 5 kΩ 對 8.2 µF 充電，固態開關放電；28 V 側為 8 µF ＋ 5 µH LISN。R<sub>A-C</sub> &lt; 50 mΩ。</figcaption></figure>
+  </details>
+  <details class="fig"><summary>原文 Figure 7<span class="en">Spike envelope</span></summary>
+    <figure><img src="figs/1275F_fig07_spike-envelope.png" alt="MIL-STD-1275F Figure 7 尖峰包絡" loading="lazy"><figcaption>MIL-STD-1275F Figure 7。</figcaption></figure>
+  </details>
+</section>
+
+<!-- ================= 4. Surges ================= -->
+<section class="panel" id="p-surge" role="tabpanel" aria-labelledby="tab-surge" hidden>
+  <div class="panel-head">
+    <h2>電壓突波：100 V、5 發連打<span class="en">Voltage surges: 100 V, five in a row</span></h2>
+    <p>突波模擬交流發電機的負載突降（load dump）。突波抑制器把輸出箝在設定電壓，多出來的電壓全部落在 MOSFET 上變成熱。下面同時看兩件事：每一發的 MOSFET 功耗，以及 5 發、每 5 秒一發之後接面溫度會累積到多高。
+      <span class="en">Surges model an alternator load dump. The surge stopper clamps its output; the excess voltage drops across the pass MOSFETs as heat. Below: MOSFET dissipation per shot, and how junction temperature builds over five shots 5 s apart.</span></p>
+  </div>
+  <div class="bench">
+    <div>
+      <div class="scope"><canvas id="cv-surge" aria-label="突波電壓與 MOSFET 功耗"></canvas>
+        <div class="scope-cap"><span class="key"><i class="src"></i>源電壓 Source</span><span class="key"><i></i>抑制器輸入 Stopper input</span><span class="key"><i class="out"></i>抑制器輸出 Stopper output</span><span class="key"><i class="heat"></i>兩者之差＝MOSFET 發熱 Heat in FETs</span><span class="key"><i class="zone"></i>Figure 8 損壞區 Damage zone</span></div>
+      </div>
+      <div class="scope short"><canvas id="cv-tj" aria-label="接面溫度"></canvas>
+        <div class="scope-cap"><span class="key"><i></i>單顆 MOSFET 接面溫度 Junction temp per FET</span><span class="key"><i class="dash"></i>T<sub>j,max</sub></span></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="seg" role="group" aria-label="波形模式">
+        <button id="su-tbl" aria-pressed="true">Table II 測試電路<span class="en">What the test applies</span></button>
+        <button id="su-env" aria-pressed="false">Figure 8 包絡上限<span class="en">Envelope worst case</span></button>
+      </div>
+      <div class="ctrl-group">
+        <div class="ctrl"><label for="su-vc">箝制電壓<span class="en">Clamp</span><output id="su-vc-o"></output></label><input type="range" id="su-vc" min="33" max="44" step="0.5" value="36"></div>
+        <div class="ctrl"><label for="su-p">負載功率<span class="en">Load</span><output id="su-p-o"></output></label><input type="range" id="su-p" min="50" max="400" step="10" value="240"></div>
+        <div class="ctrl"><label for="su-n">並聯 MOSFET<span class="en">FETs in parallel</span><output id="su-n-o"></output></label><input type="range" id="su-n" min="1" max="6" step="1" value="2"></div>
+        <div class="ctrl"><label for="su-rs">源阻抗<span class="en">Source R</span><output id="su-rs-o"></output></label><input type="range" id="su-rs" min="0" max="500" step="10" value="50"><div class="hint">見下方「500 mΩ 的位置」 · See note below</div></div>
+        <div class="ctrl"><label for="su-r1">接面→外殼 R<span class="en">Junction–case</span><output id="su-r1-o"></output></label><input type="range" id="su-r1" min="0.1" max="1.5" step="0.05" value="0.3"><div class="hint">快的一階，τ<sub>1</sub> 決定單發尖峰 · Fast stage</div></div>
+        <div class="ctrl"><label for="su-t1">τ<sub>1</sub><span class="en">fast τ</span><output id="su-t1-o"></output></label><input type="range" id="su-t1" min="2" max="200" step="1" value="15"></div>
+        <div class="ctrl"><label for="su-r2">外殼→環境 R<span class="en">Case–ambient</span><output id="su-r2-o"></output></label><input type="range" id="su-r2" min="0.3" max="10" step="0.1" value="1.5"><div class="hint">散熱片＋PCB，τ<sub>2</sub> 決定逐發累積 · Slow stage</div></div>
+        <div class="ctrl"><label for="su-t2">τ<sub>2</sub><span class="en">slow τ</span><output id="su-t2-o"></output></label><input type="range" id="su-t2" min="1" max="120" step="1" value="20"></div>
+        <div class="ctrl"><label for="su-ta">起始溫度<span class="en">Start temp</span><output id="su-ta-o"></output></label><input type="range" id="su-ta" min="25" max="100" step="5" value="70"></div>
+      </div>
+      <div class="readout"><dl>
+        <dt>MOSFET 峰值功耗<span class="en">Peak, total</span></dt><dd id="su-pk"></dd>
+        <dt>每顆峰值<span class="en">Peak per FET</span></dt><dd id="su-pk1"></dd>
+        <dt>每發能量<span class="en">Energy per shot</span></dt><dd id="su-e"></dd>
+        <dt>5 發後最高 T<sub>j</sub><span class="en">Peak T<sub>j</sub></span></dt><dd id="su-tj"></dd>
+      </dl></div>
+      <div class="verdict" id="su-verdict"></div>
+    </div>
+  </div>
+  <div class="notes">
+    <div>
+      <h3>Table II 參數<span class="en">Table II parameters</span></h3>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>項目 Item</th><th>值 Value</th></tr></thead>
+        <tbody>
+          <tr><td>V<sub>NOM</sub></td><td class="num">30 V (-0/+1)</td></tr>
+          <tr><td>V<sub>PEAK</sub></td><td class="num">100 V (-0/+10)</td></tr>
+          <tr><td>上升時間 Rise time</td><td class="num">1 ms &lt; t &lt; 10 ms</td></tr>
+          <tr><td>固態開關 1 閉合 SSW1 closed</td><td class="num">50 ms (-0/+5)</td></tr>
+          <tr><td>固態開關 2 閉合 SSW2 closed</td><td class="num">500 ms (-0/+5)</td></tr>
+          <tr><td>源阻抗 Source impedance</td><td class="num">500 mΩ (-25/+0)</td></tr>
+          <tr><td>發數／間隔 Pulses / spacing</td><td class="num">5 發，每 5 s</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div>
+      <h3>500 mΩ 的位置<span class="en">Where the 500 mΩ sits</span></h3>
+      <ul>
+        <li>Table II 與 Figure 8 註記寫「源阻抗 500 mΩ」，但 Figure 12 電路中這顆 500 mΩ 串在 <strong>30 V 正常電源</strong>那一路，不在突波路徑上。<span class="en">Table II and the Figure 8 note say 500 mΩ, but in Figure 12 that resistor sits in the 30 V supply branch, not the surge path.</span></li>
+        <li>前 50 ms 由 0.2 F 電容經兩個固態開關與 0.3 mH 直接打進設備，路徑電阻 R<sub>A-D</sub> &lt; 50 mΩ，等於低阻抗源。所以本頁預設 50 mΩ，算出的功耗跟原設計的 463 W 一致。<span class="ai">AI 依電路圖推論</span><span class="en">For the first 50 ms a 0.2 F capacitor drives the EUT through both switches and 0.3 mH, under 50 mΩ: effectively a stiff source, matching the original 463 W estimate.</span></li>
+        <li>50–500 ms 之間，固態開關 1 斷開、改經 20 Ω 送出，與 30 V／500 mΩ 並聯後約 31.7 V、0.49 Ω，低於箝制電壓，MOSFET 不再發熱。<span class="ai">AI 推算</span><span class="en">From 50 to 500 ms the generator feeds through 20 Ω; with the 30 V / 500 mΩ branch the Thevenin source is about 31.7 V / 0.49 Ω, below the clamp.</span></li>
+        <li>切到「Figure 8 包絡上限」會看到另一個數量級：若車上電源真的照包絡從 100 V 線性降到 33 V，箝制時間拉長到約 480 ms，每發能量約 120 J，是測試電路的 5 倍。規範要求設備在包絡內都不能損壞。<span class="ai">AI 推算</span><span class="en">If the vehicle bus actually followed the envelope from 100 V down to 33 V, clamping lasts ~480 ms and each shot dumps ~120 J, five times the test-circuit value. The requirement covers the whole envelope.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes" style="margin-top:0.8rem">
+    <div>
+      <h3>熱模型的限制<span class="en">Limits of the thermal model</span></h3>
+      <ul>
+        <li>這裡用兩階 RC 估算接面溫度：快的一階（接面→外殼）決定每發的溫度尖峰，慢的一階（外殼→散熱片→環境）決定 5 發之間會不會累積。假設並聯 MOSFET 完美均流。<span class="ai">簡化估算</span><span class="en">Two-stage RC: the fast stage sets each shot's spike, the slow stage sets build-up across five shots. Perfect current sharing assumed.</span></li>
+        <li>MOSFET 在線性區會有熱不穩定（Spirito 效應），實際能承受多少要看 datasheet 的 SOA 圖與 Z<sub>th</sub>(t) 曲線，不能只看溫度。<span class="en">Linear-mode operation is limited by thermal instability; check the datasheet SOA chart and Z<sub>th</sub>(t), not temperature alone.</span></li>
+        <li>預設值（0.3 K/W、15 ms；1.5 K/W、20 s）只是起點，請換成實際元件 datasheet 的 Z<sub>th</sub> 與散熱設計的數值。<span class="en">Defaults are starting points; replace them with datasheet Z<sub>th</sub> and real heatsink data.</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3>對本案的意義<span class="en">What it means for this design</span></h3>
+      <ul>
+        <li>測試電路下每發約 22 J，原設計 2 顆並聯＋故障計時的方向可行；溫度主要由單發尖峰決定，散熱片每發只累積幾度。<span class="ai">AI 推算</span><span class="en">About 22 J per shot under the test circuit; the two-FET plan holds. Each shot's spike dominates; the heatsink adds only a few degrees per shot.</span></li>
+        <li>包絡上限的每發能量約 120 J，但接面溫度只多約 10 °C——真正的風險不在溫度，而在 MOSFET 要在線性區撐約 480 ms，大多數 datasheet 的 SOA 圖在 100 ms 以上已經很窄。要涵蓋包絡，適合改用開關式前端保護或 COTS 前端模組。<span class="ai">AI 推算＋推論</span><span class="en">At the envelope limit each shot carries ~120 J yet junction temperature rises only ~10 °C more. The real risk is ~480 ms of linear-mode operation, where most SOA charts are very narrow; a switch-mode front end or a COTS module fits better.</span></li>
+      </ul>
+    </div>
+  </div>
+  <details class="fig"><summary>原文測試電路：突波注入<span class="en">Figure 12 — surge injection circuit</span></summary>
+    <figure><img src="figs/1275F_fig12_surge-injection-circuit.png" alt="MIL-STD-1275F Figure 12 突波注入測試電路" loading="lazy"><figcaption>MIL-STD-1275F Figure 12。100 V 電源對 0.2 F 充電；固態開關 1（0–50 ms）旁路 20 Ω，固態開關 2（0–500 ms）送出，經 0.3 mH 到設備；30 V 電源經 500 mΩ 與 LISN 供電。</figcaption></figure>
+  </details>
+  <details class="fig"><summary>原文 Figure 8<span class="en">Operating voltage and surge limits</span></summary>
+    <figure><img src="figs/1275F_fig08_surge-envelope.png" alt="MIL-STD-1275F Figure 8 操作電壓與突波限制" loading="lazy"><figcaption>MIL-STD-1275F Figure 8。上包絡 100 V/50 ms 線性降到 33 V/500 ms；下包絡 18 V 維持到 500 ms，600 ms 回到 20 V。</figcaption></figure>
+  </details>
+</section>
+
+<!-- ================= 5. Reverse polarity & setup ================= -->
+<section class="panel" id="p-rev" role="tabpanel" aria-labelledby="tab-rev" hidden>
+  <div class="panel-head">
+    <h2>反接保護與測試架構<span class="en">Reverse polarity and test setup</span></h2>
+    <p>正負極反接、電源加到 33 VDC、維持 5 分鐘。判定不是「有沒有燒」，而是反接電流不能超過正常工作電流，接回正確極性後還要正常運作。選一種保護方式看結果。
+      <span class="en">Swap the leads, apply 33 VDC for 5 minutes. The pass criterion is not just "no damage": reverse current must not exceed normal operating current, and the unit must work again once reconnected.</span></p>
+  </div>
+  <div class="bench">
+    <div>
+      <div class="ctrl" style="margin-bottom:0.9rem"><span style="font-size:0.86rem;font-weight:600">保護方式<span class="en" style="display:inline;margin-left:0.3rem">Protection scheme</span></span></div>
+      <div class="seg" role="group" aria-label="保護方式" id="rv-seg" style="margin-bottom:1rem">
+        <button data-s="tvs" aria-pressed="false">只有 TVS<span class="en">TVS only</span></button>
+        <button data-s="diode" aria-pressed="false">串聯二極體<span class="en">Series diode</span></button>
+        <button data-s="ideal" aria-pressed="true">理想二極體<span class="en">Ideal diode FET</span></button>
+        <button data-s="pfet" aria-pressed="false">串聯 P-MOS<span class="en">Series P-FET</span></button>
+      </div>
+      <div class="scope"><canvas id="cv-rev" aria-label="各保護方式正常運作損耗"></canvas>
+        <div class="scope-cap"><span class="key"><i></i>選定方式 Selected</span><span class="key"><i class="src"></i>其他方式 Others</span></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="ctrl-group">
+        <div class="ctrl"><label for="rv-p">負載功率<span class="en">Load</span><output id="rv-p-o"></output></label><input type="range" id="rv-p" min="50" max="400" step="10" value="240"></div>
+        <div class="ctrl"><label for="rv-r">MOSFET R<sub>DS(on)</sub><output id="rv-r-o"></output></label><input type="range" id="rv-r" min="0.5" max="20" step="0.5" value="1.5"></div>
+      </div>
+      <div class="readout"><dl>
+        <dt>正常工作電流（28 V）<span class="en">Normal I</span></dt><dd id="rv-in"></dd>
+        <dt>反接電流（33 V）<span class="en">Reverse I</span></dt><dd id="rv-ir"></dd>
+        <dt>正常運作損耗<span class="en">Loss at 28 V</span></dt><dd id="rv-l28"></dd>
+        <dt>冷車 16 V 損耗<span class="en">Loss at 16 V</span></dt><dd id="rv-l16"></dd>
+      </dl></div>
+      <div class="verdict" id="rv-verdict"></div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div>
+      <h3>測試步驟（5.3.4）<span class="en">Procedure</span></h3>
+      <ul>
+        <li>備好電流量測與保護，把設備正端接電源負端、負端接電源正端。<span class="en">With current measurement and protection in place, connect the EUT's + to supply − and − to supply +.</span></li>
+        <li>電源設 33 VDC，維持 5 分鐘；反接電流超過正常工作電流即判失敗。<span class="en">Set 33 VDC for 5 minutes; reverse current above normal operating current is a failure.</span></li>
+        <li>接回正確極性，確認功能正常；任何偏離正常運作都算失敗。<span class="en">Reconnect correctly and verify normal operation.</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3>LISN 怎麼接<span class="en">How many LISNs</span></h3>
+      <div class="seg" role="group" aria-label="回流方式" style="margin-bottom:0.8rem">
+        <button id="ls-chassis" aria-pressed="true">車殼回流<span class="en">Chassis return</span></button>
+        <button id="ls-wire" aria-pressed="false">專用回流線<span class="en">Dedicated return</span></button>
+      </div>
+      <svg class="setup" id="ls-svg" viewBox="0 0 520 190" role="img" aria-label="LISN 接法示意"></svg>
+      <p id="ls-text" style="font-size:0.85rem;color:var(--ink-muted);margin:0.6rem 0 0"></p>
+    </div>
+  </div>
+</section>
+
+<section class="common">
+  <h2>所有測試的共通條件（5.2）<span class="en">Common test conditions</span></h2>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>項目 Item</th><th>規定 Requirement</th></tr></thead>
+    <tbody>
+      <tr><td>環境 Environment</td><td>+23 °C ± 5 °C，相對濕度 0–90%，氣壓 80–102 kPa</td></tr>
+      <tr><td>電壓容差 Tolerances</td><td>標稱電壓 ±1%；量測容差預設 ±5%；電源輸出維持 ±1%</td></tr>
+      <tr><td>量測點 Reference point</td><td>設備電源輸入端；多組輸入端全部同時監測 · All inputs monitored simultaneously</td></tr>
+      <tr><td>波形驗證 Waveform check</td><td>注入波形先在開路（不接設備與負載）驗證 · Verified open circuit first</td></tr>
+      <tr><td>負載 Loads</td><td>非獨立設備要接代表實車的負載 · Vehicle-representative loads</td></tr>
+      <tr><td>前置條件 Prerequisite</td><td>EMI 與 ESD 須在 1275 測試前先通過（5.3.5、5.3.6）</td></tr>
+      <tr><td>判定 Pass / fail</td><td>任何偏離正常運作即為失敗 · Any deviation from normal operation is a failure</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</main>
+
+<footer>
+  <p>依據 MIL-STD-1275F (AT)，2022-09-07，Distribution A（不限散布）。原文圖表取自該標準 Figure 6–12。</p>
+  <p>標示「AI 推算／AI 推論／簡化估算」的內容是依原文電路與數值推導，不是規範條文；實際設計請以量測、元件 datasheet 與測試實驗室結果為準。</p>
+  <p>Ted Chen · Getac 研發部門 · 2026-10-22　｜　<a href="./index.html">54V/240W 設計指南</a></p>
+</footer>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- tabs ---------------- */
+  const tabs = [...document.querySelectorAll('.tab')];
+  const draws = {};
+  function selectTab(tab, focus) {
+    tabs.forEach(t => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', on);
+      t.tabIndex = on ? 0 : -1;
+      $(t.getAttribute('aria-controls')).hidden = !on;
+    });
+    if (focus) tab.focus();
+    const id = tab.getAttribute('aria-controls');
+    try { history.replaceState(null, '', '#' + id.slice(2)); } catch (e) { /* local file preview */ }
+    if (draws[id]) draws[id]();
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => selectTab(t));
+    t.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') selectTab(tabs[(i + 1) % tabs.length], true);
+      if (e.key === 'ArrowLeft') selectTab(tabs[(i - 1 + tabs.length) % tabs.length], true);
+    });
+  });
+
+  /* ---------------- scope plotter ---------------- */
+  function setup(cv) {
+    const r = cv.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = Math.max(1, Math.round(r.width * dpr));
+    cv.height = Math.max(1, Math.round(r.height * dpr));
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w: r.width, h: r.height };
+  }
+  // cfg: x:[min,max], y:[min,max], xTicks, yTicks, xFmt, yFmt, xLabel, yLabel, xMap (optional custom 0..1 mapping)
+  function plot(cv, cfg) {
+    const { ctx, w, h } = setup(cv);
+    const pad = { l: 46, r: 12, t: 12, b: 34 };
+    const W = w - pad.l - pad.r, H = h - pad.t - pad.b;
+    const xm = cfg.xMap || ((x) => (x - cfg.x[0]) / (cfg.x[1] - cfg.x[0]));
+    const X = (x) => pad.l + xm(x) * W;
+    const Y = (y) => pad.t + (1 - (y - cfg.y[0]) / (cfg.y[1] - cfg.y[0])) * H;
+    const grid = css('--line'), faint = css('--ink-faint'), muted = css('--ink-muted');
+    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = grid; ctx.fillStyle = muted;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    cfg.yTicks.forEach(v => {
+      ctx.beginPath(); ctx.moveTo(pad.l, Y(v) + 0.5); ctx.lineTo(pad.l + W, Y(v) + 0.5); ctx.stroke();
+      ctx.fillText((cfg.yFmt || String)(v), pad.l - 6, Y(v));
+    });
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    cfg.xTicks.forEach(v => {
+      ctx.beginPath(); ctx.moveTo(X(v) + 0.5, pad.t); ctx.lineTo(X(v) + 0.5, pad.t + H); ctx.stroke();
+      ctx.fillText((cfg.xFmt || String)(v), X(v), pad.t + H + 6);
+    });
+    ctx.fillStyle = faint; ctx.textAlign = 'right';
+    if (cfg.xLabel) ctx.fillText(cfg.xLabel, pad.l + W, pad.t + H + 20);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    if (cfg.yLabel) ctx.fillText(cfg.yLabel, 4, 2);
+    return {
+      ctx, X, Y, W, H, pad,
+      region(pts) { ctx.fillStyle = css('--mask'); ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.closePath(); ctx.fill(); },
+      line(pts, color, width = 2, dash = []) {
+        ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash); ctx.lineJoin = 'round';
+        ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+      },
+      label(x, y, text, color, align = 'left') { ctx.save(); ctx.fillStyle = color || muted; ctx.font = '11px "IBM Plex Mono", monospace'; ctx.textAlign = align; ctx.textBaseline = 'bottom'; ctx.fillText(text, X(x) + (align === 'left' ? 4 : -4), Y(y) - 3); ctx.restore(); },
+      clipY(y) { return Math.max(cfg.y[0], Math.min(cfg.y[1], y)); }
+    };
+  }
+  function verdict(el, pass, zh, en) {
+    el.className = 'verdict ' + (pass ? 'pass' : 'fail');
+    el.innerHTML = `<span class="tag">${pass ? 'PASS' : 'FAIL'}</span>${zh}<span class="en">${en}</span>`;
+  }
+  const fmt = (v, d = 1) => Number(v).toFixed(d);
+  function bind(id, unit, d, cb, scale = 1) {
+    const el = $(id), o = $(id + '-o');
+    const upd = () => { o.textContent = fmt(el.value * scale, d) + unit; cb(); };
+    el.addEventListener('input', upd);
+    o.textContent = fmt(el.value * scale, d) + unit;
+  }
+
+  /* ================= 1. Steady state ================= */
+  const stF = [30, 400, 5000];
+  function drawSteady() {
+    const v = +$('st-v').value, pp = +$('st-r').value, f = stF[+$('st-f').value], e = +$('st-e').value;
+    const p = plot($('cv-steady'), { x: [0, 3], y: [14, 38], xTicks: [0, 1, 2, 3], yTicks: [14, 18, 20, 22, 26, 30, 33, 38], xLabel: '週期數 periods', yLabel: 'V' });
+    p.region([[0, 33], [3, 33], [3, 38], [0, 38]]);
+    p.region([[0, 14], [3, 14], [3, 20], [0, 20]]);
+    p.line([[0, 33], [3, 33]], css('--ink-faint'), 1, [4, 4]);
+    p.line([[0, 20], [3, 20]], css('--ink-faint'), 1, [4, 4]);
+    p.label(0, 33, '33 V'); p.label(0, 20, '20 V');
+    const pts = [];
+    for (let i = 0; i <= 600; i++) { const t = i / 200; pts.push([t, p.clipY(v + pp / 2 * Math.sin(2 * Math.PI * t))]); }
+    p.line(pts, css('--accent'), 2);
+    const mx = v + pp / 2, mn = v - pp / 2;
+    $('st-max').textContent = fmt(mx) + ' V'; $('st-min').textContent = fmt(mn) + ' V';
+    $('st-f-o').textContent = f >= 1000 ? (f / 1000) + ' kHz' : f + ' Hz';
+    const ok = mx <= 33 + 1e-9 && mn >= 20 - 1e-9;
+    verdict($('st-verdict'), ok,
+      ok ? '電壓含漣波在 20–33 V 內，設備須正常運作' : (mx > 33 ? '峰值超過 33 V 上限' : '谷值低於 20 V 下限'),
+      ok ? 'Within 20–33 V including ripple' : (mx > 33 ? 'Peak exceeds 33 V' : 'Trough falls below 20 V'));
+    verdict($('st-e-verdict'), e <= 2, e <= 2 ? '發出漣波在 2 Vpp 內' : '發出漣波超過 2 Vpp 上限', e <= 2 ? 'Emitted ripple within 2 Vpp' : 'Emitted ripple exceeds 2 Vpp');
+  }
+  bind('st-v', ' V', 1, drawSteady); bind('st-r', ' Vpp', 1, drawSteady); bind('st-e', ' Vpp', 1, drawSteady);
+  $('st-f').addEventListener('input', drawSteady);
+  document.querySelectorAll('[data-st]').forEach(b => b.addEventListener('click', () => { $('st-v').value = b.dataset.st; $('st-r').value = 4; $('st-v-o').textContent = fmt(b.dataset.st) + ' V'; $('st-r-o').textContent = '4.0 Vpp'; drawSteady(); }));
+  draws['p-steady'] = drawSteady;
+
+  /* ================= 2. Starting event ================= */
+  let svMode = 'fig', svPlay = null, svHead = null;
+  // Figure 6: time axis with a break between 3.5 s and 27.5 s
+  const figMap = (t) => {
+    const a = 4.5, b = 5.5; // shown seconds before / after the break
+    if (t <= 3.5) return (t + 1) / (a + b) * 0.97;
+    if (t >= 27.5) return 0.03 + (a + (t - 27.5)) / (a + b) * 0.97;
+    return (a / (a + b)) * 0.97 + 0.015;
+  };
+  const figPts = [[-1, 20], [0, 20], [0, 12], [1, 12], [1, 16], [3.5, 16], [27.5, 16], [31, 16], [31, 20], [33, 20]];
+  // Table I: 20,12,20,12,20,12 each 1 s then 16 V 30 s → total 36 s, break 7.5–33.5
+  const tblSeg = [[0, 1, 20], [1, 2, 12], [2, 3, 20], [3, 4, 12], [4, 5, 20], [5, 6, 12], [6, 36, 16]];
+  const tblMap = (t) => {
+    if (t <= 8) return (t) / 13 * 0.97;
+    if (t >= 31) return 0.03 + (8 + (t - 31)) / 13 * 0.97;
+    return 8 / 13 * 0.97 + 0.015;
+  };
+  function svTblV(t) { for (const [a, b, v] of tblSeg) if (t >= a && t < b) return v; return 20; }
+  function drawStart() {
+    const P = +$('sv-p').value, eff = +$('sv-eff').value, uvlo = +$('sv-uvlo').value, R = +$('sv-r').value / 1000;
+    const isFig = svMode === 'fig';
+    const cfg = isFig
+      ? { x: [-1, 33], y: [0, 40], xMap: figMap, xTicks: [-1, 0, 1, 2, 3, 28, 29, 30, 31, 32, 33], yTicks: [0, 5, 10, 12, 16, 20, 25, 30, 33, 40], xLabel: '時間 s', yLabel: 'V' }
+      : { x: [0, 36], y: [0, 40], xMap: tblMap, xTicks: [0, 1, 2, 3, 4, 5, 6, 7, 32, 34, 36], yTicks: [0, 5, 10, 12, 16, 20, 25, 30, 33, 40], xLabel: '時間 s', yLabel: 'V' };
+    const p = plot($('cv-start'), cfg);
+    const xr = cfg.x;
+    p.region([[xr[0], 33], [xr[1], 33], [xr[1], 40], [xr[0], 40]]);
+    // break marker
+    const brk = isFig ? 15.5 : 19.5;
+    p.ctx.save(); p.ctx.fillStyle = css('--surface-raised'); p.ctx.fillRect(p.X(brk) - 5, p.pad.t, 10, p.H); p.ctx.restore();
+    p.label(brk, 3, '≈', css('--ink-faint'), 'right');
+    const pts = isFig ? figPts : (() => { const a = []; tblSeg.forEach(([s, e, v]) => { a.push([s, v], [e, v]); }); return a; })();
+    p.line(pts, css('--accent'), 2.5);
+    p.line([[xr[0], uvlo], [xr[1], uvlo]], css('--ink-muted'), 1.5, [6, 4]);
+    p.label(xr[0], uvlo, 'UVLO ' + fmt(uvlo) + ' V');
+    // dropout highlight
+    if (uvlo >= 11) {
+      const lowPts = isFig ? [[0, 12], [1, 12]] : [[1, 12], [2, 12]];
+      p.line(lowPts, css('--bad'), 5);
+    }
+    if (!isFig && svHead !== null) {
+      p.line([[svHead, 0], [svHead, 40]], css('--ink'), 1.5);
+    }
+    const pin = P / eff;
+    const i20 = pin / 20, i12 = pin / 12, i16 = pin / 16;
+    $('sv-i20').textContent = fmt(i20) + ' A';
+    $('sv-i12').textContent = fmt(i12) + ' A';
+    $('sv-i16').textContent = fmt(i16) + ' A';
+    const pl = i16 * i16 * R;
+    $('sv-pl').textContent = fmt(pl, 2) + ' W';
+    $('sv-e').textContent = fmt(pl * 30, 0) + ' J';
+    const ok = uvlo < 11;
+    verdict($('sv-verdict'), ok,
+      ok ? `UVLO 低於 11 V（12 V −1 V 容差），嚙合期間不斷電；嚙合電流 ${fmt(i12)} A` : 'UVLO 高於 11 V，嚙合突降時會斷電，判定失敗',
+      ok ? 'UVLO below the 11 V worst-case IES; equipment stays on' : 'UVLO trips during the 12 V (−1 V) engagement dip');
+  }
+  ['sv-p', 'sv-eff', 'sv-uvlo', 'sv-r'].forEach((id, k) => bind(id, [' W', '', ' V', ' mΩ'][k], [0, 2, 1, 1][k], drawStart));
+  function svSetMode(m) {
+    svMode = m; $('sv-fig').setAttribute('aria-pressed', m === 'fig'); $('sv-tbl').setAttribute('aria-pressed', m === 'tbl');
+    if (m === 'fig') stopPlay();
+    drawStart();
+  }
+  $('sv-fig').addEventListener('click', () => svSetMode('fig'));
+  $('sv-tbl').addEventListener('click', () => svSetMode('tbl'));
+  function hiRow(t) {
+    const idx = t === null ? -1 : (t < 6 ? Math.floor(t) : 6);
+    document.querySelectorAll('#sv-table tbody tr').forEach(r => r.classList.toggle('now', +r.dataset.i === idx));
+  }
+  function stopPlay() { if (svPlay) cancelAnimationFrame(svPlay); svPlay = null; svHead = null; hiRow(null); $('sv-play').textContent = '▶ 播放序列　Play'; }
+  $('sv-play').addEventListener('click', () => {
+    if (svPlay) { stopPlay(); drawStart(); return; }
+    svSetMode('tbl');
+    if (reduceMotion) { svHead = 6.5; hiRow(6.5); drawStart(); return; }
+    const t0 = performance.now(); const speed = 4; // 4× real time, 36 s → 9 s
+    $('sv-play').textContent = '■ 停止　Stop';
+    const step = (now) => {
+      const t = (now - t0) / 1000 * speed;
+      if (t >= 36) { stopPlay(); drawStart(); return; }
+      svHead = t; hiRow(t); drawStart();
+      svPlay = requestAnimationFrame(step);
+    };
+    svPlay = requestAnimationFrame(step);
+  });
+  draws['p-start'] = drawStart;
+
+  /* ================= 3. Spikes ================= */
+  let spPol = 1;
+  const upEnv = (t) => t <= 70 ? 250 : 250 - 150 * (t - 70) / 930;
+  const loEnv = (t) => t <= 70 ? -250 : -250 + 268 * (t - 70) / 930;
+  function drawSpike() {
+    const f = +$('sp-f').value * 1e3, tau = +$('sp-tau').value;
+    const p = plot($('cv-spike'), { x: [0, 1000], y: [-300, 300], xTicks: [0, 70, 200, 400, 600, 800, 1000], yTicks: [-300, -250, -100, 0, 18, 100, 250, 300], xLabel: '時間 µs', yLabel: 'V' });
+    p.region([[0, 300], [0, 250], [70, 250], [1000, 100], [1000, 300]]);
+    p.region([[0, -300], [0, -250], [70, -250], [1000, 18], [1000, -300]]);
+    p.line([[0, 250], [70, 250], [1000, 100]], css('--ink-faint'), 1.2);
+    p.line([[0, -250], [70, -250], [1000, 18]], css('--ink-faint'), 1.2);
+    p.label(70, 250, '250 V, 70 µs'); p.label(1000, 100, '100 V, 1 ms', null, 'right'); p.label(1000, 18, '+18 V, 1 ms', null, 'right');
+    const A = spPol > 0 ? 222 : 278; // rides on 28 V
+    const pts = []; let viol = false;
+    for (let i = 0; i <= 3000; i++) {
+      const t = i / 3; // µs
+      const v = 28 + spPol * A * Math.exp(-t / tau) * Math.cos(2 * Math.PI * f * t * 1e-6);
+      if (t > 0.5 && (v > upEnv(t) + 0.5 || v < loEnv(t) - 0.5)) viol = true;
+      pts.push([t, p.clipY(v)]);
+    }
+    p.line(pts, css('--accent'), 1.4);
+    const fn = 1 / (2 * Math.PI * Math.sqrt(5e-6 * 8.2e-6));
+    $('sp-fn').textContent = fmt(fn / 1000) + ' kHz';
+    $('sp-ec').textContent = fmt(0.5 * 8.2e-6 * 250 * 250 * 1000, 0) + ' mJ';
+    verdict($('sp-verdict'), !viol,
+      viol ? '振盪衰減太慢，波形穿出 Figure 7 包絡：這已超出規範定義的尖峰，代表測試架構或設備輸入阻抗異常' : '波形在 Figure 7 包絡內；設備在 50 發尖峰下必須正常運作',
+      viol ? 'Ringing decays too slowly and leaves the Figure 7 envelope' : 'Within the Figure 7 envelope; equipment must keep working through 50 shots');
+  }
+  bind('sp-f', ' kHz', 0, drawSpike); bind('sp-tau', ' µs', 0, drawSpike);
+  $('sp-pos').addEventListener('click', () => { spPol = 1; $('sp-pos').setAttribute('aria-pressed', 'true'); $('sp-neg').setAttribute('aria-pressed', 'false'); drawSpike(); });
+  $('sp-neg').addEventListener('click', () => { spPol = -1; $('sp-neg').setAttribute('aria-pressed', 'true'); $('sp-pos').setAttribute('aria-pressed', 'false'); drawSpike(); });
+  draws['p-spike'] = drawSpike;
+
+  /* ================= 4. Surges ================= */
+  let suMode = 'tbl';
+  // source (Vs, Rs) at time t in ms within one shot
+  function suSource(t, rsUser) {
+    if (suMode === 'tbl') {
+      if (t < 0 || t >= 500) return [30, 0.5];
+      if (t < 5) return [30 + 70 * t / 5, rsUser];          // rise 1–10 ms, 5 ms used
+      if (t < 50) return [100, rsUser];                      // SSW1 + SSW2 closed
+      return [31.7, 0.488];                                  // via 20 Ω ∥ 30 V/500 mΩ
+    }
+    if (t < 0) return [30, rsUser];
+    if (t < 50) return [100, rsUser];
+    if (t < 500) return [100 - 67 * (t - 50) / 450, rsUser];
+    return [30, rsUser];
+  }
+  // returns {vs, vin, vout, pfet}
+  function suPoint(t, pin, vc, rsUser) {
+    const [vs, rs] = suSource(t, rsUser);
+    let vin, vout, pfet = 0;
+    const disc = vs * vs - 4 * rs * pin;
+    vin = disc > 0 ? (vs + Math.sqrt(disc)) / 2 : vs / 2;
+    vout = vin;
+    if (vin > vc) {
+      const i = pin / vc;
+      vin = vs - rs * i; vout = vc;
+      if (vin > vc) pfet = (vin - vc) * i; else { vout = vin; }
+    }
+    return { vs, vin, vout, pfet };
+  }
+  function drawSurge() {
+    const vc = +$('su-vc').value, P = +$('su-p').value, n = +$('su-n').value, rs = +$('su-rs').value / 1000;
+    const r1 = +$('su-r1').value, t1 = +$('su-t1').value / 1000, r2 = +$('su-r2').value, t2 = +$('su-t2').value, ta = +$('su-ta').value, eff = 0.92;
+    const pin = P / eff;
+    // --- one shot
+    const p = plot($('cv-surge'), { x: [-50, 1000], y: [0, 110], xTicks: [0, 50, 200, 400, 500, 600, 800, 1000], yTicks: [0, 18, 20, 33, 50, 100, 110], xLabel: '時間 ms', yLabel: 'V' });
+    p.region([[-50, 110], [50, 110], [50, 100], [-50, 100]]);
+    p.region([[50, 110], [50, 100], [500, 33], [1000, 33], [1000, 110]]);
+    p.region([[-50, 0], [-50, 18], [500, 18], [600, 20], [1000, 20], [1000, 0]]);
+    p.line([[-50, 100], [50, 100], [500, 33], [1000, 33]], css('--ink-faint'), 1);
+    p.line([[-50, 18], [500, 18], [600, 20], [1000, 20]], css('--ink-faint'), 1);
+    const src = [], vin = [], vout = [];
+    let E = 0, pk = 0;
+    const dt = 0.5;
+    for (let t = -50; t <= 1000; t += dt) {
+      const r = suPoint(t, pin, vc, rs);
+      src.push([t, r.vs]); vin.push([t, r.vin]); vout.push([t, r.vout]);
+      E += r.pfet * dt / 1000; if (r.pfet > pk) pk = r.pfet;
+    }
+    // heat band between stopper input and output
+    p.ctx.save(); p.ctx.fillStyle = css('--accent'); p.ctx.globalAlpha = 0.28; p.ctx.beginPath();
+    vin.forEach(([x, y], i) => i ? p.ctx.lineTo(p.X(x), p.Y(y)) : p.ctx.moveTo(p.X(x), p.Y(y)));
+    for (let i = vout.length - 1; i >= 0; i--) p.ctx.lineTo(p.X(vout[i][0]), p.Y(vout[i][1]));
+    p.ctx.closePath(); p.ctx.fill(); p.ctx.restore();
+    p.line(src, css('--ink-faint'), 1.5, [3, 3]);
+    p.line([[-50, vc], [1000, vc]], css('--ink-muted'), 1.3, [6, 4]);
+    p.label(1000, vc, '箝制 ' + fmt(vc) + ' V', null, 'right');
+    p.line(vin, css('--accent'), 2.2);
+    p.line(vout, css('--ink'), 1.8);
+    $('su-pk').textContent = fmt(pk, 0) + ' W';
+    $('su-pk1').textContent = fmt(pk / n, 0) + ' W';
+    $('su-e').textContent = fmt(E, 1) + ' J';
+    // --- thermal: 5 shots at 0,5,10,15,20 s
+    const pq = plot($('cv-tj'), { x: [0, 25], y: [0, 200], xTicks: [0, 5, 10, 15, 20, 25], yTicks: [0, 50, 100, 150, 175, 200], xLabel: '時間 s', yLabel: '°C' });
+    pq.region([[0, 175], [25, 175], [25, 200], [0, 200]]);
+    pq.line([[0, 175], [25, 175]], css('--ink-muted'), 1.2, [6, 4]);
+    // two-stage Foster RC: fast (junction–case) + slow (case–ambient), same heat flow through both
+    const tStep = 0.0005; let d1 = 0, d2 = 0, maxT = ta; const tj = [];
+    const shot = []; for (let t = 0; t < 1000; t += 0.5) shot.push(suPoint(t, pin, vc, rs).pfet / n);
+    for (let s = 0, k = 0; s <= 25; s += tStep, k++) {
+      const local = (s % 5) * 1000; const idx = Math.floor(local / 0.5);
+      const pw = (s < 25 && idx < shot.length) ? shot[idx] : 0;
+      d1 += (pw * r1 - d1) / t1 * tStep;
+      d2 += (pw * r2 - d2) / t2 * tStep;
+      const T = ta + d1 + d2; if (T > maxT) maxT = T;
+      if (k % 20 === 0) tj.push([s, Math.min(200, T)]);
+    }
+    pq.line(tj, css('--accent'), 2);
+    $('su-tj').textContent = fmt(maxT, 0) + ' °C';
+    const ok = maxT < 175;
+    const margin = 175 - maxT;
+    verdict($('su-verdict'), ok,
+      ok ? `估算最高 ${fmt(maxT, 0)} °C，距 175 °C 剩 ${fmt(margin, 0)} °C；仍須對照 SOA 圖` : `估算最高 ${fmt(maxT, 0)} °C，超過 175 °C：增加並聯數、改善散熱或縮短故障計時`,
+      ok ? `Peak ${fmt(maxT, 0)} °C, ${fmt(margin, 0)} °C margin; still check the SOA chart` : `Peak ${fmt(maxT, 0)} °C exceeds 175 °C: add FETs, improve cooling or shorten the fault timer`);
+  }
+  [['su-vc', ' V', 1], ['su-p', ' W', 0], ['su-n', ' 顆', 0], ['su-rs', ' mΩ', 0], ['su-r1', ' K/W', 2], ['su-t1', ' ms', 0], ['su-r2', ' K/W', 1], ['su-t2', ' s', 0], ['su-ta', ' °C', 0]].forEach(([id, u, d]) => bind(id, u, d, drawSurge));
+  function suSet(m) {
+    suMode = m; $('su-tbl').setAttribute('aria-pressed', m === 'tbl'); $('su-env').setAttribute('aria-pressed', m === 'env');
+    drawSurge();
+  }
+  $('su-tbl').addEventListener('click', () => suSet('tbl'));
+  $('su-env').addEventListener('click', () => suSet('env'));
+  draws['p-surge'] = drawSurge;
+
+  /* ================= 5. Reverse polarity ================= */
+  let rvS = 'ideal';
+  const rvNames = { tvs: ['只有 TVS', 'TVS only'], diode: ['串聯二極體', 'Series diode'], ideal: ['理想二極體', 'Ideal diode'], pfet: ['串聯 P-MOS', 'Series P-FET'] };
+  function rvLoss(s, i, rds) {
+    if (s === 'tvs') return 0;
+    if (s === 'diode') return 0.7 * i;
+    if (s === 'ideal') return i * i * rds;
+    return i * i * rds * 2.5; // P-channel: roughly 2.5× R_DS(on) of a comparable N-channel
+  }
+  function drawRev() {
+    const P = +$('rv-p').value, rds = +$('rv-r').value / 1000;
+    const in28 = P / 0.92 / 28, in16 = P / 0.85 / 16;
+    const order = ['tvs', 'diode', 'ideal', 'pfet'];
+    const loss28 = order.map(s => rvLoss(s, in28, rds)), loss16 = order.map(s => rvLoss(s, in16, rds));
+    const cv = $('cv-rev'); const { ctx, w, h } = setup(cv);
+    const pad = { l: 120, r: 70, t: 14, b: 26 };
+    const max = Math.max(1, ...loss16) * 1.1;
+    const bw = (h - pad.t - pad.b) / order.length;
+    ctx.font = '12px "Noto Sans TC", sans-serif'; ctx.textBaseline = 'middle';
+    order.forEach((s, k) => {
+      const y = pad.t + k * bw;
+      const sel = s === rvS;
+      ctx.fillStyle = sel ? css('--ink') : css('--ink-muted'); ctx.textAlign = 'right';
+      ctx.fillText(rvNames[s][0], pad.l - 10, y + bw * 0.5);
+      const L28 = (w - pad.l - pad.r) * loss28[k] / max, L16 = (w - pad.l - pad.r) * loss16[k] / max;
+      ctx.fillStyle = sel ? css('--accent') : css('--line');
+      ctx.fillRect(pad.l, y + bw * 0.18, Math.max(1, L16), bw * 0.28);
+      ctx.globalAlpha = sel ? 0.55 : 1; ctx.fillRect(pad.l, y + bw * 0.52, Math.max(1, L28), bw * 0.28); ctx.globalAlpha = 1;
+      ctx.fillStyle = css('--ink-muted'); ctx.textAlign = 'left'; ctx.font = '11px "IBM Plex Mono", monospace';
+      ctx.fillText(s === 'tvs' ? '— 無串聯元件' : fmt(loss16[k], 1) + ' W @16V', pad.l + L16 + 6, y + bw * 0.32);
+      if (s !== 'tvs') ctx.fillText(fmt(loss28[k], 1) + ' W @28V', pad.l + L28 + 6, y + bw * 0.66);
+      ctx.font = '12px "Noto Sans TC", sans-serif';
+    });
+    ctx.fillStyle = css('--ink-faint'); ctx.textAlign = 'left'; ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.fillText('正常運作時串聯元件損耗 · series loss in normal operation', pad.l, h - 10);
+    $('rv-in').textContent = fmt(in28, 2) + ' A';
+    const ir = rvS === 'tvs' ? '電源限流值' : '< 1 mA';
+    $('rv-ir').textContent = ir;
+    $('rv-l28').textContent = rvS === 'tvs' ? '—' : fmt(rvLoss(rvS, in28, rds), 2) + ' W';
+    $('rv-l16').textContent = rvS === 'tvs' ? '—' : fmt(rvLoss(rvS, in16, rds), 2) + ' W';
+    const pass = rvS !== 'tvs';
+    const msg = {
+      tvs: ['TVS 在反接時正向導通，電流只受電源限流，遠大於正常電流；5 分鐘內 TVS 會過熱短路', 'The TVS conducts forward when reversed; current is limited only by the supply'],
+      diode: ['反接只剩漏電流，判定通過；代價是正常運作時 0.7 V 壓降的損耗，冷車時最明顯', 'Only leakage flows reversed; the price is the 0.7 V drop, worst during cranking'],
+      ideal: ['控制器偵測反向即關斷 MOSFET，反接電流只剩微安級；正常運作損耗最低', 'The controller turns the FET off on reverse; lowest loss in normal operation'],
+      pfet: ['P-MOS 閘極接地，反接時自然關斷；不需控制 IC，但同尺寸 R_DS(on) 約為 N-MOS 的 2–3 倍', 'Gate tied to ground turns it off when reversed; simpler, but higher R_DS(on)']
+    }[rvS];
+    verdict($('rv-verdict'), pass, msg[0], msg[1]);
+  }
+  bind('rv-p', ' W', 0, drawRev); bind('rv-r', ' mΩ', 1, drawRev);
+  document.querySelectorAll('#rv-seg button').forEach(b => b.addEventListener('click', () => {
+    rvS = b.dataset.s; document.querySelectorAll('#rv-seg button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawRev();
+  }));
+
+  // LISN setup diagram
+  let lsMode = 'chassis';
+  function drawLisn() {
+    const two = lsMode === 'wire';
+    const svg = $('ls-svg');
+    svg.innerHTML = `
+      <rect class="box" x="10" y="30" width="90" height="50" rx="4"/><text x="55" y="52" text-anchor="middle">28 V</text><text x="55" y="68" text-anchor="middle">電源</text>
+      <rect class="lisn" x="170" y="30" width="110" height="50" rx="4"/><text x="225" y="52" text-anchor="middle">5 µH LISN</text><text x="225" y="68" text-anchor="middle">+ 線</text>
+      <rect class="box" x="370" y="30" width="110" height="${two ? 140 : 110}" rx="4"/><text x="425" y="${two ? 105 : 90}" text-anchor="middle">EUT</text>
+      <path class="wire" d="M100 55 H170 M280 55 H370"/>
+      ${two
+        ? `<rect class="lisn" x="170" y="120" width="110" height="50" rx="4"/><text x="225" y="142" text-anchor="middle">5 µH LISN</text><text x="225" y="158" text-anchor="middle">回流線</text>
+           <path class="wire" d="M55 80 V145 H170 M280 145 H370"/>`
+        : `<path class="gnd" d="M30 160 H490"/><text x="260" y="182" text-anchor="middle">接地平面＝車殼 ground plane</text>
+           <path class="wire" d="M55 80 V160 M425 140 V160"/>`}
+    `;
+    $('ls-text').innerHTML = two
+      ? '設備有專用回流導線（電線、匯流排）時用 2 顆 LISN，模擬車上額外的回流線束。<span class="en">Two LISNs when the EUT has a dedicated return conductor, to simulate the extra harness.</span>'
+      : '以車殼當回流時只用 1 顆 LISN，依 MIL-STD-461 鋪接地平面模擬車體，設備與電源負端都接到接地平面。<span class="en">One LISN when the chassis is the return; a MIL-STD-461 ground plane simulates the hull.</span>';
+  }
+  $('ls-chassis').addEventListener('click', () => { lsMode = 'chassis'; $('ls-chassis').setAttribute('aria-pressed', 'true'); $('ls-wire').setAttribute('aria-pressed', 'false'); drawLisn(); });
+  $('ls-wire').addEventListener('click', () => { lsMode = 'wire'; $('ls-wire').setAttribute('aria-pressed', 'true'); $('ls-chassis').setAttribute('aria-pressed', 'false'); drawLisn(); });
+  draws['p-rev'] = () => { drawRev(); drawLisn(); };
+
+  /* ---------------- init ---------------- */
+  const start = location.hash ? tabs.find(t => t.getAttribute('aria-controls') === 'p-' + location.hash.slice(1)) : null;
+  selectTab(start || tabs[0]);
+  let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { const t = tabs.find(x => x.getAttribute('aria-selected') === 'true'); draws[t.getAttribute('aria-controls')](); }, 120); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { const t = tabs.find(x => x.getAttribute('aria-selected') === 'true'); draws[t.getAttribute('aria-controls')](); });
+  document.fonts && document.fonts.ready.then(() => { const t = tabs.find(x => x.getAttribute('aria-selected') === 'true'); draws[t.getAttribute('aria-controls')](); });
+})();
+</script>
+</body>
+</html>
