@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MIL-STD-1275 電源設計指南</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -292,6 +297,25 @@
   td.verdict { color: var(--accent); font-weight: 600; font-family: "IBM Plex Mono", monospace; font-size: 0.84rem; }
 
   /* ---------- Bar compare (PCB copper) ---------- */
+  /* ---------- interactive calculators ---------- */
+  .calc { border: 1px solid var(--line); border-radius: 6px; padding: 1rem 1.1rem 1.1rem; margin: 1.3rem 0 1.6rem; background: var(--surface-raised); }
+  .calc-title { font-weight: 700; margin: 0 0 0.2rem; }
+  .calc-sub { font-size: 0.82rem; color: var(--ink-muted); margin: 0 0 0.9rem; }
+  .calc-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.9rem 1.6rem; }
+  @media (max-width: 640px) { .calc-grid { grid-template-columns: 1fr; } }
+  .calc .f { display: flex; flex-direction: column; gap: 0.15rem; }
+  .calc .f label { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.84rem; font-weight: 600; }
+  .calc .f output { font-family: "IBM Plex Mono", monospace; color: var(--accent); white-space: nowrap; }
+  .calc .f input[type=range] { width: 100%; accent-color: var(--accent); }
+  .calc .f .hint { font-size: 0.74rem; color: var(--ink-faint); }
+  .calc dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 0.3rem 0.8rem; font-size: 0.85rem; align-content: start; }
+  .calc dt { color: var(--ink-muted); }
+  .calc dd { margin: 0; text-align: right; font-family: "IBM Plex Mono", monospace; font-weight: 600; }
+  .calc dd.key { color: var(--accent); }
+  .calc canvas { display: block; width: 100%; height: 190px; margin-top: 0.9rem; }
+  .calc .note { font-size: 0.8rem; color: var(--ink-muted); margin: 0.8rem 0 0; }
+  .fix { font-size: 0.74rem; font-weight: 700; color: var(--accent); margin-right: 0.3rem; }
+  s { color: var(--ink-faint); }
   .bar-compare { margin: 1rem 0 1.4rem; }
   .bar-row { margin-bottom: 0.85rem; }
   .bar-row .bar-label { font-size: 0.82rem; color: var(--ink-muted); margin-bottom: 0.3rem; display: flex; justify-content: space-between; }
@@ -390,6 +414,8 @@
 
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
+</head>
+<body>
 
 <header class="masthead">
   <div class="masthead-inner">
@@ -526,6 +552,29 @@
         <div class="callout-label">設計影響</div>
         <p style="margin:0;">第1級保護 MOSFET、輸入電感、第2級開關元件必須能在冷車期間承受連續 <strong class="hl">30A</strong> 電流而不飽和或過熱。另外要用 16.7A 持續 30 秒評估穩態溫升——峰值條件只有 1 秒，長時間冷車才是決定散熱與電感溫升的條件。效率 0.9 為假設值。</p>
       </div>
+
+      <div class="calc" id="calc-stress">
+        <p class="calc-title">試算：輸入電壓對電流與升壓工作週期的影響</p>
+        <p class="calc-sub">拖拉輸入電壓，看 1275F 各個關鍵電壓點的輸入電流，以及升壓級需要的工作週期。</p>
+        <div class="calc-grid">
+          <div class="f"><label for="cs-vin"><span>輸入電壓 V<sub>IN</sub></span><output id="cs-vin-o"></output></label><input type="range" id="cs-vin" min="10" max="36" step="0.5" value="16"><span class="hint">12 V 嚙合 · 16 V 冷車 · 28 V 標稱 · 33 V 上限</span></div>
+          <div class="f"><label for="cs-p">輸出功率<output id="cs-p-o"></output></label><input type="range" id="cs-p" min="50" max="400" step="10" value="240"></div>
+          <div class="f"><label for="cs-eff">效率 η<output id="cs-eff-o"></output></label><input type="range" id="cs-eff" min="0.80" max="0.97" step="0.01" value="0.90"></div>
+          <div class="f"><label for="cs-vout">輸出電壓<output id="cs-vout-o"></output></label><input type="range" id="cs-vout" min="40" max="60" step="1" value="54"></div>
+        </div>
+        <canvas id="cs-cv" aria-label="輸入電流對輸入電壓曲線"></canvas>
+        <div class="calc-grid" style="margin-top:0.8rem">
+          <dl>
+            <dt>輸入電流</dt><dd class="key" id="cs-iin"></dd>
+            <dt>輸出電流</dt><dd id="cs-iout"></dd>
+          </dl>
+          <dl>
+            <dt>升壓工作週期（理想）</dt><dd class="key" id="cs-d"></dd>
+            <dt>含效率估算</dt><dd id="cs-d2"></dd>
+          </dl>
+        </div>
+        <p class="note">工作週期 D = 1 − V<sub>IN</sub>/V<sub>OUT</sub>（連續導通模式）；含效率估算用 D ≈ 1 − η·V<sub>IN</sub>/V<sub>OUT</sub>。D 超過約 80% 時，升壓級的峰值電流、導通損耗與控制迴路穩定度都會變差，這是本頁建議考慮隔離拓撲的原因。</p>
+      </div>
     </section>
 
     <section id="surge">
@@ -586,6 +635,15 @@
         <li><strong>前端濾波與突波保護：</strong>如 Gaia Converter PGDS-50 或 Vicor M-FIAM9，吸收 100V 突波與 ±250V 尖峰，並輸出乾淨的 10V–36V 範圍。</li>
         <li><strong>DC-DC 隔離轉換器：</strong>選用寬輸入（9V–36V 或 10V–40V，俗稱「超寬輸入」或 4:1 輸入範圍軍規磚型）的 COTS 模組，如 SynQor MCOTS 系列或 Gaia Converter MGDD 系列，配置為 54V 輸出，在輸入降至 9V/10V 時仍可全功率輸出。</li>
       </ul>
+      <div class="callout">
+        <div class="callout-label">2026-10-22 型號查證</div>
+        <ul class="plain" style="margin:0">
+          <li><strong>Vicor M-FIAM9</strong>：存在，半磚前端濾波／暫態保護，最高 500W、18A；但 datasheet 列的是 MIL-STD-1275A/B/D，沒有列 E／F。F 版注入尖峰能量 200mJ，比 D 版 15mJ 高很多，要向 Vicor 確認。</li>
+          <li><strong>Gaia PGDS-50</strong>、<strong>Gaia Filt 系列 300W+</strong>：查無此型號。Gaia 現有前端模組 FLHG-60 只有 60W，不足 240W。</li>
+          <li><strong>SynQor 54V 輸出</strong>：SynQor MCOTS 28V 輸入系列的輸出最高 48V，上調 10% 也只到 52.8V，沒有 54V 型號。若堅持 54V，需另找廠商或客製。</li>
+          <li>Gaia MGDD、XP Power DSF 尚未查證。</li>
+        </ul>
+      </div>
     </section>
 
     <section id="checklist">
@@ -622,13 +680,21 @@
       <h3>(1) 前端反向極性保護</h3>
       <p><strong>核心 IC：</strong><span class="mono">TI LM74700-Q1</span> 或 <span class="mono">Analog Devices LTC4359</span>，驅動 N 通道 MOSFET（Q1）。</p>
       <p>標準二極體在 30A 冷車電流下損耗超過 20W（P = 0.7V × 30A）。理想二極體控制器在正常運作時使 MOSFET 保持導通，功耗降至 1W 以下（P = I² × R<sub>DS(on)</sub>）。</p>
+      <div class="callout">
+        <div class="callout-label">2026-10-22 datasheet 查證：耐壓不足</div>
+        <p style="margin:0;">LM74700-Q1 的輸入工作範圍是 3.2–65V（反向 −65V），TI 註明要搭配 TVS；LTC4359 工作 4–80V、絕對最大 100V。1275F 突波 100V（Table II 容差到 110V）、尖峰 250V，兩顆都<strong>不能直接放在最前端</strong>。可行方向：把反接保護整合進突波抑制器的背對背 MOSFET，或選耐壓高於 110V 的架構（例如浮接式高壓突波抑制器，待查證）。突波抑制器 LT4363 本身 VCC 絕對最大也只有 100V，需要串聯電阻＋稽納箝位。（後半為 AI 推論）</p>
+      </div>
 
       <h3>(2) 主動突波抑制器（箝制）</h3>
       <p><strong>核心 IC：</strong><span class="mono">Analog Devices LT4363</span> 或 <span class="mono">LTC4366</span>。</p>
       <ul class="plain">
         <li>過壓箝制門檻設為 34V 或 36V；UVLO 跳脫點設為 8V，確保電池降至 10V 冷車時抑制器仍完全導通、呈透明狀態。</li>
-        <li>MOSFET 選型（Q2, Q3）：兩顆並聯強健 N 通道 MOSFET（如 <span class="mono">Infineon IPT015N10N7</span>，100V、1.5mΩ），搭配大功率源極均流電阻，須具備巨大 SOA 以承受突波期間 64V（100V 突波 − 36V 箝制）× 7.5A、持續 50ms（約 480W 熱脈衝）。</li>
+        <li>MOSFET 選型（Q2, Q3）：兩顆並聯強健 N 通道 MOSFET（如 <s>Infineon IPT015N10N7</s> <span class="mono">IPT015N10N5</span>，100V、1.5mΩ），搭配大功率源極均流電阻，須具備巨大 SOA 以承受突波期間 64V（100V 突波 − 36V 箝制）× 7.5A、持續 50ms（約 480W 熱脈衝）。</li>
       </ul>
+      <div class="callout">
+        <div class="callout-label">2026-10-22 查證：料號與 V<sub>DS</sub> 餘裕</div>
+        <p style="margin:0;">IPT015N10N7 查無此料號，同規格的是 OptiMOS 5 的 <span class="mono">IPT015N10N5</span>（TOLL，300A）。另外 Table II 的 V<sub>PEAK</sub> 容差到 110V：故障計時器在突波中關掉 MOSFET 時，V<sub>DS</sub> 約 110V，超過 100V 額定。建議改用 150V 元件，或確認 TVS 會在 100V 以下先動作；線性區撐 50ms 以上，最好挑標明線性模式 SOA 的料。（AI 推論）</p>
+      </div>
 
       <h3>(3) 高功率同步升壓轉換器</h3>
       <p><strong>核心 IC：</strong><span class="mono">TI LM5122</span>（寬輸入同步升壓控制器）。</p>
@@ -648,12 +714,40 @@
           <tbody>
             <tr><td>UVLO 分壓（設 7.5V）</td><td class="num">7.5V</td><td class="num-cell num">R_UV1(上) = 100kΩ　R_UV2(下) = 20.5kΩ</td></tr>
             <tr><td>過壓箝制分壓（設 35V）</td><td class="num">35V</td><td class="num-cell num">R_OUT1(上) = 100kΩ　R_OUT2(下) = 3.74kΩ</td></tr>
-            <tr><td>故障計時電容 C<sub>T</sub></td><td class="num">≈12nF</td><td class="num-cell num">50V 額定 X7R 陶瓷電容</td></tr>
+            <tr><td>故障計時電容 C<sub>T</sub></td><td class="num"><s>≈12nF</s> ≈2.2µF</td><td class="num-cell num">依 datasheet 重算，見下方試算</td></tr>
             <tr><td>閘極電阻</td><td class="num">10Ω</td><td class="num-cell num">每顆 MOSFET 閘極串聯</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="font-size:0.86rem; color:var(--ink-muted);">故障計時電容計算：100V 突波被箝制至 35V 時，MOSFET 需承受 65V × 7.5A ≈ 487.5W。以公式 <span class="mono">C_T = (I_TMR × t_fault) / 1.275V</span>，最差情況 I<sub>TMR</sub> ≈ 260µA，60ms 安全窗口 → C<sub>T</sub> ≈ 12nF。</p>
+      <p style="font-size:0.86rem; color:var(--ink-muted);"><span class="fix">2026-10-22 更正</span>分壓電阻驗算正確（100k/20.5k → 7.49V；100k/3.74k → 35.4V，門檻 1.275V）。但原本的計時電容算錯：<s>以 C_T = (I_TMR × t_fault)/1.275V、I_TMR ≈ 260µA → 12nF</s>。260µA 是 datasheet 的<strong>過電流</strong>計時電流（ΔV<sub>DS</sub> 80V）；過電壓時計時電流隨 V<sub>DS</sub> 變化，0.5V 時 4µA、75V 時 50µA（typ）。用 12nF 算出來約 0.4ms 就關斷，100V/50ms 突波還沒結束輸出就斷電，測試會失敗。用下面的試算重算。</p>
+
+      <div class="calc" id="calc-lt">
+        <p class="calc-title">試算：LT4363 分壓電阻與故障計時電容</p>
+        <p class="calc-sub">依 LT4363 datasheet Rev. C：門檻 1.275V；計時器先以 I<sub>TMR</sub>(V<sub>DS</sub>) 充 0.775V，FLT 拉低後改以 6µA 再充 100mV 才關斷 MOSFET。</p>
+        <div class="calc-grid">
+          <div class="f"><label for="lt-uv">UVLO 目標<output id="lt-uv-o"></output></label><input type="range" id="lt-uv" min="6" max="12" step="0.1" value="7.5"><span class="hint">須低於 11V（IES 12V 減容差）</span></div>
+          <div class="f"><label for="lt-ov">箝制電壓目標<output id="lt-ov-o"></output></label><input type="range" id="lt-ov" min="30" max="40" step="0.5" value="35"></div>
+          <div class="f"><label for="lt-vpk">突波峰值<output id="lt-vpk-o"></output></label><input type="range" id="lt-vpk" min="80" max="110" step="1" value="100"><span class="hint">Table II：100V（-0/+10）</span></div>
+          <div class="f"><label for="lt-t">要撐過的時間<output id="lt-t-o"></output></label><input type="range" id="lt-t" min="50" max="150" step="1" value="70"><span class="hint">突波 50ms（+5ms 容差）再留餘裕</span></div>
+        </div>
+        <div class="calc-grid" style="margin-top:1rem">
+          <dl>
+            <dt>UV 下端電阻（上端 100kΩ）</dt><dd id="lt-ruv"></dd>
+            <dt>實際 UVLO</dt><dd id="lt-uv-act"></dd>
+            <dt>OV／FB 下端電阻（上端 100kΩ）</dt><dd id="lt-rov"></dd>
+            <dt>實際箝制電壓</dt><dd id="lt-ov-act"></dd>
+          </dl>
+          <dl>
+            <dt>箝制時 V<sub>DS</sub></dt><dd id="lt-vds"></dd>
+            <dt>計時電流 I<sub>TMR</sub></dt><dd id="lt-itmr"></dd>
+            <dt>需要的 C<sub>TMR</sub></dt><dd class="key" id="lt-c"></dd>
+            <dt>標準值與實際時間</dt><dd id="lt-cstd"></dd>
+            <dt>FLT 拉低時間點</dt><dd id="lt-tflt"></dd>
+            <dt>原寫 12nF 的時間</dt><dd id="lt-old"></dd>
+          </dl>
+        </div>
+        <p class="note">電阻取 E96 標準值。I<sub>TMR</sub> 在 datasheet 的兩個典型點（0.5V→4µA、75V→50µA）之間線性內插，超出 75V 沿用同一斜率外推（AI 估算），實際以 datasheet Figure 1 曲線為準。計時時間越長，MOSFET 在線性區的時間越長——撐過突波後還要對照 MOSFET 的 SOA 圖。</p>
+      </div>
 
       <h3>(5) 高電流 PCB 佈局規則（承受 30A）</h3>
       <div class="bar-compare">
@@ -671,6 +765,31 @@
         <li><strong>過孔堆疊：</strong>標準 0.3mm 過孔僅安全承載 3–4A，每個輸入端子、MOSFET 焊墊轉換點、電感接點須用至少 8–10 個過孔簇群疊接銅層；突波抑制器與升壓開關 MOSFET 散熱墊下方應密布 0.25mm 填孔並蓋孔的散熱過孔，將熱量導入內層地平面。</li>
         <li><strong>功率迴路最小化：</strong>低邊升壓開關（Q4）、高邊同步整流（Q5）與高頻輸出陶瓷電容（Cout）所形成的迴路面積須盡可能小，避免板子在切換頻率（如 250kHz）下如天線般輻射，導致 MIL-STD-461 EMI 測試不合格；輸出陶瓷電容應緊鄰 Q4、Q5 接腳放置。</li>
       </ul>
+
+      <div class="calc" id="calc-pcb">
+        <p class="calc-title">試算：走線寬度與過孔數量</p>
+        <p class="calc-sub">依 IPC-2221 公式 I = k·ΔT<sup>0.44</sup>·A<sup>0.725</sup>（外層 k = 0.048、內層 k = 0.024，A 單位 mil²）。電流平均分給並聯的各層。</p>
+        <div class="calc-grid">
+          <div class="f"><label for="pc-i">電流<output id="pc-i-o"></output></label><input type="range" id="pc-i" min="5" max="60" step="1" value="30"><span class="hint">冷車峰值約 28–30A</span></div>
+          <div class="f"><label for="pc-oz">銅厚<output id="pc-oz-o"></output></label><input type="range" id="pc-oz" min="1" max="3" step="1" value="2"></div>
+          <div class="f"><label for="pc-dt">允許溫升<output id="pc-dt-o"></output></label><input type="range" id="pc-dt" min="10" max="40" step="5" value="20"></div>
+          <div class="f"><label for="pc-n">並聯層數<output id="pc-n-o"></output></label><input type="range" id="pc-n" min="1" max="4" step="1" value="1"><span class="hint">前 2 層算外層（頂／底），其餘算內層</span></div>
+          <div class="f"><label for="pc-d">過孔鑽孔<output id="pc-d-o"></output></label><input type="range" id="pc-d" min="0.2" max="0.5" step="0.05" value="0.3"></div>
+          <div class="f"><label for="pc-pl">孔壁鍍銅<output id="pc-pl-o"></output></label><input type="range" id="pc-pl" min="15" max="35" step="5" value="25"></div>
+        </div>
+        <canvas id="pc-cv" aria-label="各並聯層數所需線寬"></canvas>
+        <div class="calc-grid" style="margin-top:0.8rem">
+          <dl>
+            <dt>每層需要的線寬</dt><dd class="key" id="pc-w"></dd>
+            <dt>只走一層外層時</dt><dd id="pc-w1"></dd>
+          </dl>
+          <dl>
+            <dt>每個過孔約可承載</dt><dd id="pc-via"></dd>
+            <dt>每次換層至少需要</dt><dd class="key" id="pc-nvia"></dd>
+          </dl>
+        </div>
+        <p class="note">IPC-2221 是業界常用的保守近似，跟 IPC-2152 圖表、板廠經驗與熱模擬會有差距；上方長條圖的 15.5mm 來源不明，與此公式算出的外層值不同，建議以板廠規範或熱模擬定案。過孔以孔壁銅環截面積套外層公式估算，多個過孔並聯還要考慮均流。</p>
+      </div>
     </section>
 
     <section id="takeaways">
@@ -678,9 +797,9 @@
       <h2>設計須知重點清單</h2>
       <div class="takeaway-grid">
         <div class="takeaway"><span class="idx">01</span><p><strong>架構決策：</strong>輸出54V遠高於箝制後輸入電壓，不能用純buck型突波抑制器，必須是「主動保護前端 + 升壓/隔離轉換」兩級架構。</p></div>
-        <div class="takeaway"><span class="idx">02</span><p><strong>輸入電壓範圍要涵蓋全部工況：</strong>不只是28V標稱，還要涵蓋10V冷車啟動與100V/±250V突波後被箝制的34-36V，第二級轉換器輸入窗口設計為約10V–36V。</p></div>
+        <div class="takeaway"><span class="idx">02</span><p><strong>輸入電壓範圍要涵蓋全部工況：</strong>不只是28V標稱，還要涵蓋10V冷車啟動與100V/±250V突波後被箝制的34-36V，第二級轉換器輸入窗口設計為約10V–36V。規範本身是 IES 12V（容差下 11V）持續 1 秒，加上冷車 16V 持續 30 秒；以 10V 設計留有餘裕。</p></div>
         <div class="takeaway"><span class="idx">03</span><p><strong>突波級是最大熱設計挑戰：</strong>100V突波被箝制到36V時，MOSFET瞬間需消耗約463–487W（50ms），必須用多顆並聯MOSFET＋源極均流電阻＋故障計時電路防止SOA被超過而燒毀，或直接採用COTS突波保護模組規避風險。</p></div>
-        <div class="takeaway"><span class="idx">04</span><p><strong>冷車30A電流是關鍵設計基準：</strong>所有電感飽和電流、MOSFET RDS(on)、PCB線寬/銅重都要按30A（而非9.3A穩態）設計，否則冷車瞬間就會過熱或觸發OCP跳脫。</p></div>
+        <div class="takeaway"><span class="idx">04</span><p><strong>冷車30A電流是關鍵設計基準：</strong>所有電感飽和電流、MOSFET RDS(on)、PCB線寬/銅重都要按30A（而非9.3A穩態）設計，否則冷車瞬間就會過熱或觸發OCP跳脫。散熱則要另外用 16V 冷車持續 30 秒（約 17A）評估，這段時間長到熱會傳到外殼。</p></div>
         <div class="takeaway"><span class="idx">05</span><p><strong>控制器閘極驅動偏壓不能直接吃輸入電壓：</strong>10V冷車輸入若直接驅動MOSFET閘極，驅動電壓不足會讓MOSFET卡在線性區瞬間燒毀——必須用輸出回饋偏壓或獨立閘極驅動電源。</p></div>
         <div class="takeaway"><span class="idx">06</span><p><strong>隔離 vs 非隔離的取捨：</strong>非隔離升壓效率高、體積小，但54V回流與28V共地，可能造成底盤接地基準偏移；240W這個功率等級建議採隔離架構，尤其若對接地乾淨度／安全隔離有要求。</p></div>
         <div class="takeaway"><span class="idx">07</span><p><strong>COTS vs 分離式設計是風險與客製化的權衡：</strong>COTS風險低、開發快但體積較大、成本較高；分離式設計可客製化但工程風險與驗證工作量大增。</p></div>
@@ -694,7 +813,7 @@
 
     <p class="part-label">Part II</p>
     <p class="part-title" style="font-family:'Noto Serif TC',serif; font-weight:700;">規範對比</p>
-    <p class="part-intro">MIL-STD-1275 是美軍地面車輛28V電力系統規範，ISO 7637 是民用車輛12V/24V系統的傳導性電氣干擾規範。兩者性質不同，但都涵蓋突波、尖峰、負載突降/啟動電壓凹陷等類似測試項目，可逐項對比。</p>
+    <p class="part-intro">MIL-STD-1275 是美軍地面車輛28V電力系統規範，ISO 7637 是民用車輛12V/24V系統的傳導性電氣干擾規範。兩者性質不同，但都涵蓋突波、尖峰、負載突降/啟動電壓凹陷等類似測試項目，可逐項對比。注意：現行 ISO 7637-2 只剩 Pulse 1、2a、2b、3a、3b，負載突降與啟動曲線已移到 ISO 16750-2，下表兩者合併比較。</p>
 
     <section id="comparison">
       <p class="eyebrow">10</p>
@@ -702,14 +821,14 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>項目</th><th>MIL-STD-1275（28V系統）</th><th>ISO 7637-2（12V/24V系統）</th><th>誰較嚴苛</th></tr>
+            <tr><th>項目</th><th>MIL-STD-1275（28V系統）</th><th>ISO 7637-2 ＋ ISO 16750-2（12V/24V系統）</th><th>誰較嚴苛</th></tr>
           </thead>
           <tbody>
             <tr><td>標稱電壓</td><td>28V</td><td>12V 或 24V</td><td class="verdict">1275</td></tr>
             <tr><td>穩態電壓範圍</td><td>20~33V（含漣波；1275F 上限 33V）；可承受注入漣波 4Vpp、30Hz~5kHz</td><td>約9~16V（12V系統）</td><td class="verdict">1275</td></tr>
-            <tr><td>啟動/冷車電壓凹陷</td><td>1275F：初始嚙合 IES 最低 12V、最長 1 秒；冷車最低 16V、最長 30 秒</td><td>Pulse 4：12V系統可降至約4.5~6V，通常伴隨明確恢復斜率曲線</td><td class="verdict">各有嚴苛點</td></tr>
-            <tr><td>突波（Surge）</td><td>+100V／50ms，包絡線性降到 500ms 時 33V；測試 5 發間隔 5 秒（1275F Figure 8、Table II）</td><td>Pulse 5 Load Dump：未抑制可達35~100V+，持續40~400ms，ISO 7637中能量最高</td><td class="verdict">相近量級</td></tr>
-            <tr><td>尖峰（Spike）</td><td>±250V，上升 ≤50ns，振盪 20~500kHz，單發 ≤200mJ，各極性至少 50 發</td><td>Pulse 1/2a/2b/3a/3b：多在±50~150V範圍</td><td class="verdict">1275較嚴苛</td></tr>
+            <tr><td>啟動/冷車電壓凹陷</td><td>1275F：初始嚙合 IES 最低 12V、最長 1 秒；冷車最低 16V、最長 30 秒</td><td>啟動曲線已不在現行 ISO 7637-2（舊版 Pulse 4），改由 ISO 16750-2 規定；24V 系統最嚴約 6V／50ms 後維持 10V（二手資料）</td><td class="verdict">各有嚴苛點</td></tr>
+            <tr><td>突波（Surge）</td><td>+100V／50ms，包絡線性降到 500ms 時 33V；測試 5 發間隔 5 秒（1275F Figure 8、Table II）</td><td>負載突降 2010 年起從 ISO 7637-2 移到 ISO 16750-2：Test A（未抑制）24V 系統 151–202V、R<sub>i</sub> 1–8Ω、100–350ms；12V 系統 79–101V、0.5–4Ω、40–400ms；10 發、每分鐘一發</td><td class="verdict">類型不同</td></tr>
+            <tr><td>尖峰（Spike）</td><td>±250V，上升 ≤50ns，振盪 20~500kHz，單發 ≤200mJ，各極性至少 50 發</td><td>Pulse 1／2a／2b／3a／3b（12V 測試例：Pulse 1 −100V／10Ω／2ms；3a／3b ±100V／50Ω／100ns）</td><td class="verdict">1275較嚴苛</td></tr>
             <tr><td>反向極性</td><td>反接 33VDC 持續 5 分鐘，反接電流 ≤ 正常工作電流，接回後須正常運作</td><td>Pulse 1 為感性負載斷開的負向瞬態，非全反向電池情境</td><td class="verdict">1275更真實</td></tr>
             <tr><td>EMI/傳導發射</td><td>另有MIL-STD-461（CE102等），通常與1275併行要求</td><td>另有CISPR 25 / ISO 11452系列</td><td class="verdict">461更嚴</td></tr>
             <tr><td>環境應力</td><td>常與MIL-STD-810併行，溫度範圍更寬（-40°C~+85°C以上）、振動衝擊更嚴苛</td><td>通常對應ISO 16750系列，範圍相對較窄</td><td class="verdict">1275更嚴苛</td></tr>
@@ -728,7 +847,7 @@
         <div class="reason-card">
           <div class="reason-num">01</div>
           <h4>電壓能量等級更高</h4>
-          <p>±250V尖峰、100V/50ms突波，遠超ISO7637多數脈衝上限；本案（54V/240W）MOSFET的SOA壓力（463W瞬間功耗）比對應的ISO7637 load dump情境更嚴峻。</p>
+          <p>±250V尖峰、100V/50ms突波；本案（54V/240W）MOSFET的SOA壓力（463W瞬間功耗）很重。要注意的是 24V 未抑制負載突降（ISO 16750-2 Test A）峰值可到 202V，比 1275 的 100V 還高，但源阻抗 1–8Ω、能量能用 TVS 吸收；1275 的突波來自低阻抗源，TVS 吸收不了，只能主動箝制——難在類型，不只在數字。（AI 推論）</p>
         </div>
         <div class="reason-card">
           <div class="reason-num">02</div>
@@ -750,13 +869,139 @@
       <p style="font-size:0.86rem; color:var(--ink-muted); margin-top:1.6rem;">簡言之：如果只比較單一脈衝的電壓峰值，1275的±250V尖峰與100V/50ms突波在數字上就已經比ISO7637大多數脈衝更硬；再疊加軍規特有的反向電池、EMI（461）、環境（810）要求與驗證流程，MIL-STD-1275 對54V/240W電源的設計挑戰明顯高於單純滿足ISO7637的車用電源。</p>
 
       <div class="callout" style="margin-top:1.2rem;">
-        <p style="margin:0; font-size:0.82rem; color:var(--ink-muted);">註：ISO 7637各Pulse的確切數值依系統電壓等級（12V/24V）與OEM選定的嚴苛等級（Severity Level I~IV）而不同，設計前應對照客戶指定的確切版本與等級核實數值，上表為代表性量級對比。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--ink-muted);">註：ISO 7637各Pulse的確切數值依系統電壓等級（12V/24V）與OEM選定的嚴苛等級（Severity Level I~IV）而不同，設計前應對照客戶指定的確切版本與等級核實數值，上表為代表性量級對比。2026-10-22 補充：ISO 標準為付費文件，本頁 ISO 數值取自 Vishay、TI 等公開應用文件，未對照 ISO 原文。</p>
       </div>
     </section>
 
   </main>
 
   <footer class="doc-footer">
-    原文：Obsidian_Ted vault ·「MIL-STD-1275 (54V 240W).md」　｜　Ted Chen · Getac 研發部門　｜　整理生成 2026-08-28　｜　2026-10-22 依 MIL-STD-1275F（2022-09-07）官方原文校正
+    原文：Obsidian_Ted vault ·「MIL-STD-1275 (54V 240W).md」　｜　Ted Chen · Getac 研發部門　｜　整理生成 2026-08-28　｜　2026-10-22 依 MIL-STD-1275F（2022-09-07）官方原文校正，並依 datasheet 查證元件與參數
   </footer>
 </div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const f = (v, d = 1) => Number(v).toFixed(d);
+  function bind(ids, fn) {
+    ids.forEach(([id, unit, d, scale = 1]) => {
+      const el = $(id), o = $(id + '-o');
+      const show = () => { o.textContent = f(el.value * scale, d) + unit; };
+      el.addEventListener('input', () => { show(); fn(); });
+      show();
+    });
+    fn();
+  }
+  function canvas(cv) {
+    const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    cv.width = Math.max(1, Math.round(r.width * dpr)); cv.height = Math.max(1, Math.round(r.height * dpr));
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w: r.width, h: r.height };
+  }
+  const E96 = [1.00,1.02,1.05,1.07,1.10,1.13,1.15,1.18,1.21,1.24,1.27,1.30,1.33,1.37,1.40,1.43,1.47,1.50,1.54,1.58,1.62,1.65,1.69,1.74,1.78,1.82,1.87,1.91,1.96,2.00,2.05,2.10,2.15,2.21,2.26,2.32,2.37,2.43,2.49,2.55,2.61,2.67,2.74,2.80,2.87,2.94,3.01,3.09,3.16,3.24,3.32,3.40,3.48,3.57,3.65,3.74,3.83,3.92,4.02,4.12,4.22,4.32,4.42,4.53,4.64,4.75,4.87,4.99,5.11,5.23,5.36,5.49,5.62,5.76,5.90,6.04,6.19,6.34,6.49,6.65,6.81,6.98,7.15,7.32,7.50,7.68,7.87,8.06,8.25,8.45,8.66,8.87,9.09,9.31,9.53,9.76];
+  function e96(x) { const dec = Math.pow(10, Math.floor(Math.log10(x))); let best = E96[0] * dec; E96.forEach(m => { if (Math.abs(m * dec - x) < Math.abs(best - x)) best = m * dec; }); if (Math.abs(10 * dec - x) < Math.abs(best - x)) best = 10 * dec; return best; }
+  const kfmt = (ohm) => ohm >= 1000 ? f(ohm / 1000, ohm >= 1e5 ? 0 : 2) + 'kΩ' : f(ohm, 1) + 'Ω';
+
+  /* ① stress */
+  function stress() {
+    const vin = +$('cs-vin').value, P = +$('cs-p').value, eta = +$('cs-eff').value, vout = +$('cs-vout').value;
+    const iin = (v) => P / (eta * v);
+    $('cs-iin').textContent = f(iin(vin)) + ' A';
+    $('cs-iout').textContent = f(P / vout, 2) + ' A';
+    $('cs-d').textContent = f((1 - vin / vout) * 100) + ' %';
+    $('cs-d2').textContent = f((1 - eta * vin / vout) * 100) + ' %';
+    const { ctx, w, h } = canvas($('cs-cv'));
+    const pad = { l: 40, r: 10, t: 10, b: 26 }, W = w - pad.l - pad.r, H = h - pad.t - pad.b;
+    const ymax = Math.ceil(iin(10) / 10) * 10;
+    const X = (v) => pad.l + (v - 10) / 26 * W, Y = (i) => pad.t + (1 - i / ymax) * H;
+    ctx.font = '11px "IBM Plex Mono", monospace'; ctx.strokeStyle = css('--line'); ctx.fillStyle = css('--ink-muted'); ctx.lineWidth = 1;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let i = 0; i <= ymax; i += 10) { ctx.beginPath(); ctx.moveTo(pad.l, Y(i) + 0.5); ctx.lineTo(pad.l + W, Y(i) + 0.5); ctx.stroke(); ctx.fillText(i + 'A', pad.l - 6, Y(i)); }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [10, 12, 16, 20, 28, 33, 36].forEach(v => ctx.fillText(v + 'V', X(v), pad.t + H + 6));
+    [[12, 'IES'], [16, '冷車'], [28, '標稱'], [33, '上限']].forEach(([v, t]) => {
+      ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = css('--ink-faint'); ctx.beginPath(); ctx.moveTo(X(v) + 0.5, pad.t); ctx.lineTo(X(v) + 0.5, pad.t + H); ctx.stroke(); ctx.restore();
+      ctx.fillStyle = css('--ink-faint'); ctx.textAlign = 'left'; ctx.fillText(t, X(v) + 3, pad.t + 2); ctx.textAlign = 'center'; ctx.fillStyle = css('--ink-muted');
+    });
+    ctx.strokeStyle = css('--accent'); ctx.lineWidth = 2; ctx.beginPath();
+    for (let v = 10; v <= 36; v += 0.25) { v === 10 ? ctx.moveTo(X(v), Y(iin(v))) : ctx.lineTo(X(v), Y(iin(v))); }
+    ctx.stroke();
+    ctx.fillStyle = css('--accent'); ctx.beginPath(); ctx.arc(X(vin), Y(iin(vin)), 5, 0, Math.PI * 2); ctx.fill();
+  }
+  bind([['cs-vin', ' V', 1], ['cs-p', ' W', 0], ['cs-eff', '', 2], ['cs-vout', ' V', 0]], stress);
+
+  /* ② LT4363 */
+  function lt() {
+    const uv = +$('lt-uv').value, ov = +$('lt-ov').value, vpk = +$('lt-vpk').value, t = +$('lt-t').value / 1000;
+    const VTH = 1.275, RT = 100e3;
+    const ruv = RT / (uv / VTH - 1), ruvS = e96(ruv), uvAct = VTH * (1 + RT / ruvS);
+    const rov = RT / (ov / VTH - 1), rovS = e96(rov), ovAct = VTH * (1 + RT / rovS);
+    $('lt-ruv').textContent = kfmt(ruvS);
+    $('lt-uv-act').textContent = f(uvAct, 2) + ' V';
+    $('lt-rov').textContent = kfmt(rovS);
+    $('lt-ov-act').textContent = f(ovAct, 2) + ' V';
+    const vds = Math.max(0.5, vpk - ovAct);
+    const itmr = (4 + (vds - 0.5) * (46 / 74.5)) * 1e-6;
+    $('lt-vds').textContent = f(vds) + ' V';
+    $('lt-itmr').textContent = f(itmr * 1e6) + ' µA';
+    const k = 0.775 / itmr + 0.1 / 6e-6; // seconds per farad
+    const creq = t / k;
+    $('lt-c').textContent = creq >= 1e-6 ? f(creq * 1e6, 2) + ' µF' : f(creq * 1e9, 0) + ' nF';
+    const E6 = [1.0, 1.5, 2.2, 3.3, 4.7, 6.8];
+    const dec = Math.pow(10, Math.floor(Math.log10(creq)));
+    let cs = null; for (const m of E6) { if (m * dec >= creq * 0.999) { cs = m * dec; break; } } if (!cs) cs = 10 * dec;
+    $('lt-cstd').textContent = (cs >= 1e-6 ? f(cs * 1e6, 1) + ' µF' : f(cs * 1e9, 0) + ' nF') + ' → ' + f(cs * k * 1000, 0) + ' ms';
+    $('lt-tflt').textContent = f(cs * 0.775 / itmr * 1000, 0) + ' ms';
+    $('lt-old').textContent = f(12e-9 * k * 1000, 2) + ' ms';
+  }
+  bind([['lt-uv', ' V', 1], ['lt-ov', ' V', 1], ['lt-vpk', ' V', 0], ['lt-t', ' ms', 0]], lt);
+
+  /* ③ PCB */
+  const OZ_MIL = 1.378; // 1 oz copper ≈ 35 µm ≈ 1.378 mil
+  function layerI(wMil, tMil, dT, ext) { const k = ext ? 0.048 : 0.024; return k * Math.pow(dT, 0.44) * Math.pow(wMil * tMil, 0.725); }
+  function widthFor(I, n, tMil, dT) {
+    let lo = 1, hi = 20000;
+    for (let it = 0; it < 60; it++) {
+      const mid = (lo + hi) / 2;
+      let sum = 0; for (let k = 0; k < n; k++) sum += layerI(mid, tMil, dT, k < 2);
+      sum >= I ? hi = mid : lo = mid;
+    }
+    return hi;
+  }
+  function pcb() {
+    const I = +$('pc-i').value, oz = +$('pc-oz').value, dT = +$('pc-dt').value, n = +$('pc-n').value, d = +$('pc-d').value, pl = +$('pc-pl').value;
+    const t = oz * OZ_MIL;
+    const w = widthFor(I, n, t, dT), w1 = widthFor(I, 1, t, dT);
+    $('pc-w').textContent = f(w * 0.0254, 1) + ' mm（' + f(w, 0) + ' mil）';
+    $('pc-w1').textContent = f(w1 * 0.0254, 1) + ' mm';
+    const dMil = d / 0.0254, plMil = pl / 25.4;
+    const aVia = Math.PI * (dMil + plMil) * plMil;
+    const iVia = 0.048 * Math.pow(dT, 0.44) * Math.pow(aVia, 0.725);
+    $('pc-via').textContent = f(iVia, 2) + ' A';
+    $('pc-nvia').textContent = Math.ceil(I / iVia) + ' 個';
+    const { ctx, w: cw, h } = canvas($('pc-cv'));
+    const pad = { l: 64, r: 70, t: 8, b: 8 }, bw = (h - pad.t - pad.b) / 4;
+    const widths = [1, 2, 3, 4].map(k => widthFor(I, k, t, dT) * 0.0254), max = Math.max(...widths);
+    ctx.font = '12px "Noto Sans TC", sans-serif'; ctx.textBaseline = 'middle';
+    widths.forEach((wm, k) => {
+      const y = pad.t + k * bw, sel = k + 1 === n;
+      ctx.fillStyle = sel ? css('--ink') : css('--ink-muted'); ctx.textAlign = 'right';
+      ctx.fillText((k + 1) + ' 層並聯', pad.l - 10, y + bw / 2);
+      const L = (cw - pad.l - pad.r) * wm / max;
+      ctx.fillStyle = sel ? css('--accent') : css('--line');
+      ctx.fillRect(pad.l, y + bw * 0.25, Math.max(2, L), bw * 0.5);
+      ctx.fillStyle = css('--ink-muted'); ctx.textAlign = 'left'; ctx.font = '11px "IBM Plex Mono", monospace';
+      ctx.fillText(f(wm, 1) + ' mm', pad.l + L + 6, y + bw / 2); ctx.font = '12px "Noto Sans TC", sans-serif';
+    });
+  }
+  bind([['pc-i', ' A', 0], ['pc-oz', ' oz', 0], ['pc-dt', ' °C', 0], ['pc-n', ' 層', 0], ['pc-d', ' mm', 2], ['pc-pl', ' µm', 0]], pcb);
+
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { stress(); pcb(); }, 120); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { stress(); pcb(); });
+  document.fonts && document.fonts.ready.then(() => { stress(); pcb(); });
+})();
+</script>
+</body>
+</html>

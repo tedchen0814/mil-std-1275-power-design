@@ -23,6 +23,7 @@
     --ok-tint: #E6F3EA;
     --bad: #B42318;
     --bad-tint: #FCE9E6;
+    --src: #2563B8;
     --band-bg: #1C1D1F;
   }
   @media (prefers-color-scheme: dark) {
@@ -32,6 +33,7 @@
       --line: #36322F; --accent: #FF7A33; --accent-strong: #FF6B3D; --accent-on: #1C1D1F;
       --accent-tint: #2E211A; --mask: rgba(255, 122, 51, 0.13);
       --ok: #5BC888; --ok-tint: #17291E; --bad: #FF7B6E; --bad-tint: #33201D;
+      --src: #6FB2FF;
     }
   }
   :root[data-theme="dark"] {
@@ -40,6 +42,7 @@
     --line: #36322F; --accent: #FF7A33; --accent-strong: #FF6B3D; --accent-on: #1C1D1F;
     --accent-tint: #2E211A; --mask: rgba(255, 122, 51, 0.13);
     --ok: #5BC888; --ok-tint: #17291E; --bad: #FF7B6E; --bad-tint: #33201D;
+    --src: #6FB2FF;
   }
 
   * { box-sizing: border-box; }
@@ -100,7 +103,8 @@
   .scope-cap { display: flex; flex-wrap: wrap; gap: 0.3rem 1.1rem; font-size: 0.78rem; color: var(--ink-muted); padding: 0.35rem 0.3rem 0.2rem; }
   .key { display: inline-flex; align-items: center; gap: 0.4rem; }
   .key i { display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--accent); }
-  .key i.src { border-top-color: var(--ink-faint); }
+  .key i.src { border-top: 2.5px solid var(--src); }
+  .key i.other { height: 8px; border: 0; background: var(--line); }
   .key i.dash { border-top: 2px dashed var(--ink-muted); }
   .key i.zone { height: 10px; border: 0; background: var(--mask); }
   .key i.out { border-top-color: var(--ink); }
@@ -395,9 +399,9 @@
         <div class="ctrl"><label for="su-n">並聯 MOSFET<span class="en">FETs in parallel</span><output id="su-n-o"></output></label><input type="range" id="su-n" min="1" max="6" step="1" value="2"></div>
         <div class="ctrl"><label for="su-rs">源阻抗<span class="en">Source R</span><output id="su-rs-o"></output></label><input type="range" id="su-rs" min="0" max="500" step="10" value="50"><div class="hint">見下方「500 mΩ 的位置」 · See note below</div></div>
         <div class="ctrl"><label for="su-r1">接面→外殼 R<span class="en">Junction–case</span><output id="su-r1-o"></output></label><input type="range" id="su-r1" min="0.1" max="1.5" step="0.05" value="0.3"><div class="hint">快的一階，τ<sub>1</sub> 決定單發尖峰 · Fast stage</div></div>
-        <div class="ctrl"><label for="su-t1">τ<sub>1</sub><span class="en">fast τ</span><output id="su-t1-o"></output></label><input type="range" id="su-t1" min="2" max="200" step="1" value="15"></div>
+        <div class="ctrl"><label for="su-t1"><span>τ<sub>1</sub><span class="en">fast τ</span></span><output id="su-t1-o"></output></label><input type="range" id="su-t1" min="2" max="200" step="1" value="15"></div>
         <div class="ctrl"><label for="su-r2">外殼→環境 R<span class="en">Case–ambient</span><output id="su-r2-o"></output></label><input type="range" id="su-r2" min="0.3" max="10" step="0.1" value="1.5"><div class="hint">散熱片＋PCB，τ<sub>2</sub> 決定逐發累積 · Slow stage</div></div>
-        <div class="ctrl"><label for="su-t2">τ<sub>2</sub><span class="en">slow τ</span><output id="su-t2-o"></output></label><input type="range" id="su-t2" min="1" max="120" step="1" value="20"></div>
+        <div class="ctrl"><label for="su-t2"><span>τ<sub>2</sub><span class="en">slow τ</span></span><output id="su-t2-o"></output></label><input type="range" id="su-t2" min="1" max="120" step="1" value="20"></div>
         <div class="ctrl"><label for="su-ta">起始溫度<span class="en">Start temp</span><output id="su-ta-o"></output></label><input type="range" id="su-ta" min="25" max="100" step="5" value="70"></div>
       </div>
       <div class="readout"><dl>
@@ -477,13 +481,13 @@
         <button data-s="pfet" aria-pressed="false">串聯 P-MOS<span class="en">Series P-FET</span></button>
       </div>
       <div class="scope"><canvas id="cv-rev" aria-label="各保護方式正常運作損耗"></canvas>
-        <div class="scope-cap"><span class="key"><i></i>選定方式 Selected</span><span class="key"><i class="src"></i>其他方式 Others</span></div>
+        <div class="scope-cap"><span class="key"><i></i>選定方式 Selected</span><span class="key"><i class="other"></i>其他方式 Others</span></div>
       </div>
     </div>
     <div class="side">
       <div class="ctrl-group">
         <div class="ctrl"><label for="rv-p">負載功率<span class="en">Load</span><output id="rv-p-o"></output></label><input type="range" id="rv-p" min="50" max="400" step="10" value="240"></div>
-        <div class="ctrl"><label for="rv-r">MOSFET R<sub>DS(on)</sub><output id="rv-r-o"></output></label><input type="range" id="rv-r" min="0.5" max="20" step="0.5" value="1.5"></div>
+        <div class="ctrl"><label for="rv-r"><span>MOSFET R<sub>DS(on)</sub></span><output id="rv-r-o"></output></label><input type="range" id="rv-r" min="0.5" max="20" step="0.5" value="1.5"></div>
       </div>
       <div class="readout"><dl>
         <dt>正常工作電流（28 V）<span class="en">Normal I</span></dt><dd id="rv-in"></dd>
@@ -826,7 +830,7 @@
     vin.forEach(([x, y], i) => i ? p.ctx.lineTo(p.X(x), p.Y(y)) : p.ctx.moveTo(p.X(x), p.Y(y)));
     for (let i = vout.length - 1; i >= 0; i--) p.ctx.lineTo(p.X(vout[i][0]), p.Y(vout[i][1]));
     p.ctx.closePath(); p.ctx.fill(); p.ctx.restore();
-    p.line(src, css('--ink-faint'), 1.5, [3, 3]);
+    p.line(src, css('--src'), 2.2);
     p.line([[-50, vc], [1000, vc]], css('--ink-muted'), 1.3, [6, 4]);
     p.label(1000, vc, '箝制 ' + fmt(vc) + ' V', null, 'right');
     p.line(vin, css('--accent'), 2.2);
