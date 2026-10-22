@@ -91,7 +91,7 @@
     padding: 3.2rem 1.5rem 2.6rem;
   }
   .masthead-inner {
-    max-width: 78ch;
+    max-width: 1032px;
     margin: 0 auto;
   }
   .kicker {
@@ -112,7 +112,7 @@
   .masthead p.lede {
     color: #C9C6C2;
     font-size: 1.02rem;
-    max-width: 62ch;
+    max-width: 48em;
     margin: 0 0 1.6rem;
   }
   .meta-row {
@@ -127,48 +127,25 @@
 
   /* ---------- Page shell ---------- */
   .shell {
-    max-width: 1180px;
+    max-width: 1080px;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 230px minmax(0, 1fr);
-    gap: 3rem;
-    padding: 2.8rem 1.5rem 6rem;
-  }
-  @media (max-width: 960px) {
-    .shell { grid-template-columns: 1fr; }
-    nav.toc { display: none; }
+    padding: 2.6rem 1.5rem 6rem;
   }
 
-  nav.toc {
-    position: sticky;
-    top: 1.6rem;
-    align-self: start;
-    font-size: 0.86rem;
-  }
-  nav.toc .toc-group { margin-bottom: 1.6rem; }
-  nav.toc .toc-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-bottom: 0.6rem;
-  }
-  nav.toc ol { list-style: none; margin: 0; padding: 0; }
-  nav.toc li { margin: 0; }
-  nav.toc a {
-    display: block;
-    padding: 0.32rem 0 0.32rem 0.75rem;
-    color: var(--ink-muted);
-    text-decoration: none;
-    border-left: 2px solid var(--line);
-    transition: color .15s, border-color .15s;
-  }
-  nav.toc a:hover { color: var(--accent); border-color: var(--accent); }
+  /* ---------- top navigation (sticky) ---------- */
+  .topnav-wrap { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .topnav { max-width: 1080px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; }
+  .topnav::-webkit-scrollbar { display: none; }
+  .topnav .grp { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-faint); white-space: nowrap; padding: 0 0.35rem 0 1.1rem; }
+  .topnav .grp:first-child { padding-left: 0; }
+  .topnav a { white-space: nowrap; font-size: 0.83rem; color: var(--ink-muted); text-decoration: none; padding: 0.75rem 0.42rem 0.65rem; border-bottom: 2px solid transparent; }
+  .topnav a:hover { color: var(--ink); }
+  .topnav a.on { color: var(--ink); border-bottom-color: var(--accent); }
+  .topnav a.lab { color: var(--accent); font-weight: 600; }
 
-  main { min-width: 0; max-width: 74ch; }
+  main { min-width: 0; }
 
-  section { margin-bottom: 3.4rem; scroll-margin-top: 1.5rem; }
+  section { margin-bottom: 3.4rem; scroll-margin-top: 3.6rem; }
   section > .eyebrow {
     font-size: 0.78rem;
     font-weight: 600;
@@ -400,17 +377,15 @@
     font-size: 1.9rem;
     margin: 0 0 0.4rem;
   }
-  .part-intro { color: var(--ink-muted); max-width: 60ch; margin-bottom: 2rem; }
+  .part-intro { color: var(--ink-muted); margin-bottom: 2rem; }
 
   footer.doc-footer {
-    max-width: 74ch;
-    margin: 0 auto;
-    padding: 0 1.5rem 4rem;
+    margin: 0;
+    padding: 1.4rem 0 0;
+    border-top: 1px solid var(--line);
     color: var(--ink-faint);
     font-size: 0.8rem;
-    grid-column: 1 / -1;
   }
-  .shell footer.doc-footer { padding-left: 0; }
 
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
@@ -421,7 +396,7 @@
   <div class="masthead-inner">
     <p class="kicker">Getac 研發部門 · 內部技術規格文件</p>
     <h1>MIL-STD-1275 54V/240W 電源設計指南</h1>
-    <p class="lede">兩級式主動保護＋升壓架構的完整設計依據——從元件應力計算、突波級熱設計，到與車用 ISO 7637 規範的合規難度比較。</p>
+    <p class="lede">先看 MIL-STD-1275F 跟車規 ISO 7637-2／16750-2 的要求差在哪，再看 54V/240W 兩級式主動保護＋升壓架構怎麼設計——元件應力、突波級熱設計、datasheet 參數與 PCB 佈局。</p>
     <div class="meta-row">
       <span><strong>作者</strong> Ted Chen</span>
       <span><strong>日期</strong> 2026-08-28</span>
@@ -431,42 +406,152 @@
   </div>
 </header>
 
-<div class="shell">
-  <nav class="toc" aria-label="文件目錄">
-    <div class="toc-group">
-      <p class="toc-label">Part I · 設計指南</p>
-      <ol>
-        <li><a href="#why-two-stage">為何需兩級式架構</a></li>
-        <li><a href="#architecture">建議架構</a></li>
-        <li><a href="#stress">元件應力計算</a></li>
-        <li><a href="#surge">突波級散熱因應</a></li>
-        <li><a href="#emi">EMI 與濾波</a></li>
-        <li><a href="#topology">拓撲選擇</a></li>
-        <li><a href="#cots">COTS 模組化方案</a></li>
-        <li><a href="#checklist">分離式設計檢查清單</a></li>
-        <li><a href="#detailed-spec">詳細分離式設計規格</a></li>
-        <li><a href="#takeaways">設計須知重點清單</a></li>
-      </ol>
-    </div>
-    <div class="toc-group">
-      <p class="toc-label">Part II · 規範對比</p>
-      <ol>
-        <li><a href="#iso-standards">ISO 7637-2 與 ISO 16750-2</a></li>
-        <li><a href="#comparison">MIL-STD-1275 vs ISO 逐項對比</a></li>
-        <li><a href="#verdict">結論：誰較困難</a></li>
-      </ol>
-    </div>
-    <div class="toc-group">
-      <p class="toc-label">互動</p>
-      <ol>
-        <li><a href="./tests.html">MIL-STD-1275F 測試實驗室 →</a></li>
-      </ol>
-    </div>
+<div class="topnav-wrap">
+  <nav class="topnav" aria-label="文件目錄">
+    <span class="grp">規範對比</span>
+    <a href="#iso-standards">ISO 7637-2／16750-2</a>
+    <a href="#comparison">逐項對比</a>
+    <a href="#verdict">結論</a>
+    <span class="grp">設計指南</span>
+    <a href="#why-two-stage">兩級式架構</a>
+    <a href="#architecture">建議架構</a>
+    <a href="#stress">應力計算</a>
+    <a href="#surge">突波散熱</a>
+    <a href="#emi">EMI</a>
+    <a href="#topology">拓撲選擇</a>
+    <a href="#cots">COTS</a>
+    <a href="#checklist">分離式清單</a>
+    <a href="#detailed-spec">詳細規格</a>
+    <a href="#takeaways">設計須知</a>
+    <span class="grp">互動</span>
+    <a class="lab" href="./tests.html">測試實驗室 →</a>
   </nav>
+</div>
+
+<div class="shell">
 
   <main>
 
     <p class="part-label">Part I</p>
+    <p class="part-title" style="font-family:'Noto Serif TC',serif; font-weight:700;">規範對比</p>
+    <p class="part-intro">MIL-STD-1275 是美軍地面車輛28V電力系統規範，ISO 7637 是民用車輛12V/24V系統的傳導性電氣干擾規範。兩者性質不同，但都涵蓋突波、尖峰、負載突降/啟動電壓凹陷等類似測試項目，可逐項對比。注意：現行 ISO 7637-2 只剩 Pulse 1、2a、2b、3a、3b，負載突降與啟動曲線已移到 ISO 16750-2，下面先分別介紹，再合併比較。</p>
+
+    <div class="callout" style="margin-bottom:2.6rem">
+      <div class="callout-label">規範版本</div>
+      <p style="margin:0; font-size:0.9rem;">本頁數值以現行版 <strong>MIL-STD-1275F（2022-09-07）</strong> 原文為準。初版（2026-08-28）依 E 版二手資料撰寫，2026-10-22 已校正尖峰能量、反接測試、冷車持續時間、突波測試條件等數值。每一項測試的波形與判定，可以到 <a href="./tests.html">MIL-STD-1275F 測試實驗室</a> 互動試算。</p>
+    </div>
+
+    <section id="iso-standards">
+      <p class="eyebrow">1</p>
+      <h2>先認識兩份車規：ISO 7637-2 與 ISO 16750-2</h2>
+      <p>兩份都是道路車輛的電氣標準，但分工不同。<strong>ISO 7637-2</strong> 只管電源線上的「快速瞬態」：感性負載切換、線束電感、開關彈跳造成的微秒到毫秒級脈衝，另外規定怎麼量設備自己發出的瞬態——MIL-STD-1275F 量測發出尖峰時引用的就是它（第三版）。<strong>ISO 16750-2</strong> 管的是「電氣負載環境」：工作電壓範圍、過電壓、疊加漣波、緩升緩降、瞬斷、重置、啟動曲線、負載突降、反接、接地偏移、開短路。2010 年起，原本在 ISO 7637-2 的負載突降（Pulse 5）與啟動曲線（Pulse 4）都移到 ISO 16750-2，所以兩份要一起看，才能跟 MIL-STD-1275 對比。</p>
+
+      <h3>ISO 7637-2：電源線快速瞬態</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>脈衝</th><th>模擬什麼</th><th>12V 系統 U<sub>s</sub></th><th>24V 系統 U<sub>s</sub></th><th>R<sub>i</sub>／脈寬</th><th>施打量</th></tr></thead>
+          <tbody>
+            <tr><td>Pulse 1</td><td>與設備並聯的感性負載被切斷，負向反衝</td><td class="num">−75 ～ −150V</td><td class="num">−300 ～ −600V</td><td class="num">10Ω (12V)／50Ω (24V)；2ms (12V)／1ms (24V)</td><td>500 發</td></tr>
+            <tr><td>Pulse 2a</td><td>與設備並聯的負載電流突然中斷，線束電感造成正向尖峰</td><td class="num">+37 ～ +112V</td><td class="num">+37 ～ +112V</td><td class="num">2Ω；50µs</td><td>500 發</td></tr>
+            <tr><td>Pulse 2b</td><td>點火關閉後，直流馬達慣性轉動變成發電機回灌</td><td class="num">10V</td><td class="num">20V</td><td class="num">0–0.05Ω；0.2–2s</td><td>10 發</td></tr>
+            <tr><td>Pulse 3a</td><td>開關彈跳、電弧造成的負向快速突發</td><td class="num">−112 ～ −220V</td><td class="num">−150 ～ −300V</td><td class="num">50Ω；150ns，上升 5ns</td><td>連續 1 小時</td></tr>
+            <tr><td>Pulse 3b</td><td>同上，正向</td><td class="num">+75 ～ +150V</td><td class="num">+150 ～ +300V</td><td class="num">50Ω；150ns，上升 5ns</td><td>連續 1 小時</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:0.84rem;color:var(--ink-muted)">範圍為常見的嚴苛等級 III–IV；實際採用哪一級由車廠規範決定。Pulse 3 以突發方式施打（每 100µs 一發，打 10ms 停 90ms）。</p>
+
+      <h3>ISO 16750-2（2023 版）：電氣負載環境</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>項目</th><th>12V 系統</th><th>24V 系統</th><th>對應 MIL-STD-1275F</th></tr></thead>
+          <tbody>
+            <tr><td>工作電壓範圍（代碼）</td><td class="num">A 6–16V、B 8–16V、C 9–16V、D 10.5–16V</td><td class="num">E 10–32V、F 16–32V、G 22–32V、H 18–32V</td><td>20–33V（含漣波）</td></tr>
+            <tr><td>長時過電壓</td><td class="num">18V，60 分鐘，T<sub>max</sub>−20K</td><td class="num">36V，60 分鐘，T<sub>max</sub>−20K</td><td>上限 33V，無長時過電壓測試</td></tr>
+            <tr><td>跨接啟動（Jump start）</td><td class="num">26V，60 秒</td><td>無</td><td>無</td></tr>
+            <tr><td>瞬態過電壓</td><td class="num">18V／400ms，5 發</td><td class="num">36V／400ms，5 發</td><td>突波 100V／50ms，5 發</td></tr>
+            <tr><td>疊加交流漣波</td><td class="num">10Hz–200kHz 掃頻，最嚴 6Vpp</td><td class="num">10Hz–200kHz 掃頻，最嚴 10Vpp</td><td>4Vpp，30Hz–5kHz</td></tr>
+            <tr><td>緩降與緩升</td><td colspan="2">從工作電壓以 0.5V/分鐘降到 0V 再升回</td><td>無</td></tr>
+            <tr><td>重置行為</td><td colspan="2">以最低工作電壓的 5% 為一階逐步降到 0V，每階至少 5 秒，回升時檢查功能</td><td>無</td></tr>
+            <tr><td>啟動曲線</td><td>依車廠選定曲線</td><td class="num">最嚴：6V／50ms 後維持 10V（疊 2Hz 漣波），10 次</td><td>IES 12V／1 秒＋冷車 16V／30 秒</td></tr>
+            <tr><td>負載突降 Test A（未抑制）</td><td class="num">79–101V，R<sub>i</sub> 0.5–4Ω，40–400ms</td><td class="num">151–202V，R<sub>i</sub> 1–8Ω，100–350ms</td><td rowspan="2">突波 100V／50ms，路徑 &lt; 50mΩ</td></tr>
+            <tr><td>負載突降 Test B（集中抑制）</td><td class="num">箝位 27／30／32／35V</td><td class="num">箝位典型 58V</td></tr>
+            <tr><td>反接</td><td class="num">−14V，60 秒</td><td class="num">−26V，60 秒</td><td>反接 33V，5 分鐘</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:0.84rem;color:var(--ink-muted)">負載突降 Test A 為 10 發、Test B 為 5 發，間隔皆 1 分鐘。另有接地偏移、開路、短路保護、耐壓、絕緣電阻等項目，此處未列。</p>
+
+      <div class="callout">
+        <div class="callout-label">對本案的意義</div>
+        <p style="margin:0;">跟 1275F 比，ISO 16750-2 有兩項反而更嚴：<strong>24V 啟動曲線</strong>掉到 6V（1275F 最低 12V），以及<strong>漣波</strong>到 10Vpp、掃到 200kHz（1275F 是 4Vpp、到 5kHz）。如果同一顆電源也要賣給 24V 民用或商用車隊，第二級的最低輸入電壓得從 10V 往下設計到 6V，而且升壓級控制迴路要承受更寬頻的漣波。（AI 推論）</p>
+      </div>
+      <p style="font-size:0.8rem;color:var(--ink-faint)">資料來源：ISO 為付費標準，本節數值取自 Vishay、TI 公開應用文件與測試設備商（Intepro、TestUPS）整理，未對照 ISO 原文；設計定案前請依客戶指定版本與嚴苛等級確認。</p>
+    </section>
+
+    <section id="comparison">
+      <p class="eyebrow">2</p>
+      <h2>MIL-STD-1275 vs ISO 7637-2／16750-2 逐項對比</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>項目</th><th>MIL-STD-1275（28V系統）</th><th>ISO 7637-2 ＋ ISO 16750-2（12V/24V系統）</th><th>誰較嚴苛</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>標稱電壓</td><td>28V</td><td>12V 或 24V</td><td class="verdict">1275</td></tr>
+            <tr><td>穩態電壓範圍</td><td>20~33V（含漣波；1275F 上限 33V）</td><td>ISO 16750-2：12V 系統最寬 6–16V（代碼 A），24V 系統最寬 10–32V（代碼 E）；另有 36V／60 分鐘長時過電壓（24V）</td><td class="verdict">各有嚴苛點</td></tr>
+            <tr><td>漣波</td><td>可承受注入 4Vpp，30Hz~5kHz</td><td>ISO 16750-2：10Hz–200kHz 掃頻，24V 最嚴 10Vpp、12V 最嚴 6Vpp</td><td class="verdict">16750-2較嚴苛</td></tr>
+            <tr><td>啟動/冷車電壓凹陷</td><td>1275F：初始嚙合 IES 最低 12V、最長 1 秒；冷車最低 16V、最長 30 秒</td><td>ISO 16750-2（舊版 ISO 7637-2 Pulse 4）：24V 系統最嚴 6V／50ms 後維持 10V，疊 2Hz 漣波，10 次</td><td class="verdict">16750-2較深</td></tr>
+            <tr><td>突波（Surge）</td><td>+100V／50ms，包絡線性降到 500ms 時 33V；測試 5 發間隔 5 秒（1275F Figure 8、Table II）</td><td>負載突降 2010 年起從 ISO 7637-2 移到 ISO 16750-2：Test A（未抑制）24V 系統 151–202V、R<sub>i</sub> 1–8Ω、100–350ms；12V 系統 79–101V、0.5–4Ω、40–400ms；10 發、每分鐘一發</td><td class="verdict">類型不同</td></tr>
+            <tr><td>尖峰（Spike）</td><td>±250V，上升 ≤50ns，振盪 20~500kHz，單發 ≤200mJ，各極性至少 50 發</td><td>ISO 7637-2 Pulse 1／2a／2b／3a／3b：24V Pulse 1 可到 −600V、3a／3b 到 ±300V，但源阻抗 50Ω、脈寬 1ms／150ns，能量很小</td><td class="verdict">1275能量較大</td></tr>
+            <tr><td>反向極性</td><td>反接 33VDC 持續 5 分鐘，反接電流 ≤ 正常工作電流，接回後須正常運作</td><td>ISO 16750-2：12V 系統 −14V、24V 系統 −26V，各 60 秒</td><td class="verdict">1275較嚴苛</td></tr>
+            <tr><td>EMI/傳導發射</td><td>另有MIL-STD-461（CE102等），通常與1275併行要求</td><td>另有CISPR 25 / ISO 11452系列</td><td class="verdict">461更嚴</td></tr>
+            <tr><td>環境應力</td><td>常與MIL-STD-810併行，溫度範圍更寬（-40°C~+85°C以上）、振動衝擊更嚴苛</td><td>通常對應ISO 16750系列，範圍相對較窄</td><td class="verdict">1275更嚴苛</td></tr>
+            <tr><td>驗證/認證流程</td><td>軍方採購要求完整SOA分析、DO文件、第三方測試報告，流程冗長</td><td>車廠OEM企業規範（GMW3172、Ford ES-XW7T等），流程相對標準化</td><td class="verdict">1275負擔更重</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="verdict">
+      <p class="eyebrow">3</p>
+      <h2>結論：哪個比較困難？</h2>
+      <div class="verdict-banner">MIL-STD-1275 整體上比 ISO 7637 <strong>更困難</strong>。</div>
+      <p style="font-size:0.9rem;color:var(--ink-muted)">把 ISO 16750-2 一起納入後要修正一點：1275 難在<strong>突波（低阻抗源）、尖峰能量、反接</strong>與規範疊加的驗證負擔；但 24V 車規的<strong>啟動曲線（低到 6V）</strong>與<strong>漣波（10Vpp、到 200kHz）</strong>反而比 1275 嚴。同時要過兩邊的設計，輸入下限與迴路頻寬要以車規為準。（AI 推論）</p>
+
+      <div class="reason-grid">
+        <div class="reason-card">
+          <div class="reason-num">01</div>
+          <h4>電壓能量等級更高</h4>
+          <p>±250V尖峰、100V/50ms突波；本案（54V/240W）MOSFET的SOA壓力（463W瞬間功耗）很重。要注意的是 24V 未抑制負載突降（ISO 16750-2 Test A）峰值可到 202V，比 1275 的 100V 還高，但源阻抗 1–8Ω、能量能用 TVS 吸收；1275 的突波來自低阻抗源，TVS 吸收不了，只能主動箝制——難在類型，不只在數字。（AI 推論）</p>
+        </div>
+        <div class="reason-card">
+          <div class="reason-num">02</div>
+          <h4>反向極性要求更真實</h4>
+          <p>1275F 要求反接 33V 持續 5 分鐘不損壞，且反接電流不得超過正常工作電流，這比ISO7637 Pulse1的感性負載瞬態更難用簡單TVS二極體解決，往往需要主動理想二極體電路（如LM74700-Q1方案）。</p>
+        </div>
+        <div class="reason-card">
+          <div class="reason-num">03</div>
+          <h4>規範疊加驗證負擔</h4>
+          <p>必須與MIL-STD-461（EMI）、MIL-STD-810（環境）綁在一起驗證，整個專案驗證負擔遠高於車用ISO7637+CISPR25+ISO16750的組合，軍規測試方法更嚴格、允收裕度更小。</p>
+        </div>
+        <div class="reason-card">
+          <div class="reason-num">04</div>
+          <h4>供應鏈與元件現成度</h4>
+          <p>ISO7637市場成熟，車規TVS、突波抑制IC選擇多、已針對40V以下量身優化；MIL-STD-1275需要的耐壓等級（100V/150V甚至更高）元件選擇少、成本高、業界經驗較少。</p>
+        </div>
+      </div>
+
+      <p style="font-size:0.86rem; color:var(--ink-muted); margin-top:1.6rem;">簡言之：如果只比較單一脈衝的電壓峰值，1275的±250V尖峰與100V/50ms突波在數字上就已經比ISO7637大多數脈衝更硬；再疊加軍規特有的反向電池、EMI（461）、環境（810）要求與驗證流程，MIL-STD-1275 對54V/240W電源的設計挑戰明顯高於單純滿足ISO7637的車用電源。</p>
+
+      <div class="callout" style="margin-top:1.2rem;">
+        <p style="margin:0; font-size:0.82rem; color:var(--ink-muted);">註：ISO 7637各Pulse的確切數值依系統電壓等級（12V/24V）與OEM選定的嚴苛等級（Severity Level I~IV）而不同，設計前應對照客戶指定的確切版本與等級核實數值，上表為代表性量級對比。2026-10-22 補充：ISO 標準為付費文件，本頁 ISO 數值取自 Vishay、TI 等公開應用文件，未對照 ISO 原文。</p>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <p class="part-label">Part II</p>
     <p class="part-title" style="font-family:'Noto Serif TC',serif; font-weight:700;">設計指南</p>
 
     <section id="why-two-stage">
@@ -474,14 +559,10 @@
       <h2>為什麼需要兩級式架構</h2>
       <p>設計一個符合 MIL-STD-1275 規範（標稱輸入 28V）、輸出 240W、54V 的電源供應器，需要特殊的拓撲架構。由於輸出電壓（54V）遠高於最差情況下被箝制的輸入電壓（約 34V 至 40V），因此無法使用標準的純降壓型主動突波抑制器（active surge stopper）。</p>
       <p>架構必須結合「主動前端保護級」與「升壓型（Boost 或隔離式全橋/半橋）轉換器級」。</p>
-      <div class="callout">
-        <div class="callout-label">規範版本</div>
-        <p style="margin:0; font-size:0.9rem;">本頁數值以現行版 <strong>MIL-STD-1275F（2022-09-07）</strong> 原文為準。初版（2026-08-28）依 E 版二手資料撰寫，2026-10-22 已校正尖峰能量、反接測試、冷車持續時間、突波測試條件等數值。每一項測試的波形與判定，可以到 <a href="./tests.html">MIL-STD-1275F 測試實驗室</a> 互動試算。</p>
-      </div>
     </section>
 
     <section id="architecture">
-      <p class="eyebrow">1</p>
+      <p class="eyebrow">4</p>
       <h2>建議架構（兩級式方案）</h2>
 
       <div class="diagram">
@@ -527,7 +608,7 @@
     </section>
 
     <section id="stress">
-      <p class="eyebrow">2</p>
+      <p class="eyebrow">5</p>
       <h2>240W 下的關鍵元件應力計算</h2>
       <div class="stat-grid">
         <div class="stat-card">
@@ -579,7 +660,7 @@
     </section>
 
     <section id="surge">
-      <p class="eyebrow">3</p>
+      <p class="eyebrow">6</p>
       <h2>突波級的散熱因應</h2>
       <p>100V/50ms 突波期間，第1級將電壓箝制在 36V，其餘 64V 直接落在保護 MOSFET 上，同時仍須通過 240W 全負載電流。</p>
       <div class="callout danger">
@@ -601,7 +682,7 @@
     </section>
 
     <section id="emi">
-      <p class="eyebrow">4</p>
+      <p class="eyebrow">7</p>
       <h2>EMI 與濾波考量（MIL-STD-461）</h2>
       <p>MIL-STD-1275 系統幾乎都同時要求符合 MIL-STD-461 電磁干擾規範。</p>
       <ul class="plain">
@@ -612,7 +693,7 @@
     </section>
 
     <section id="topology">
-      <p class="eyebrow">5</p>
+      <p class="eyebrow">8</p>
       <h2>拓撲選擇：隔離式 vs 非隔離式</h2>
       <p>在 240W 功率下，非隔離同步升壓轉換器效率高（~96%）、體積小、成本低。但由於 10V 輸入需要極高的升壓工作週期（約 81.5%）才能達到 54V，隔離式拓撲或特殊多相方案在技術上往往更具優勢。</p>
       <div class="table-wrap">
@@ -629,7 +710,7 @@
     </section>
 
     <section id="cots">
-      <p class="eyebrow">6</p>
+      <p class="eyebrow">9</p>
       <h2>方案一：商用現成品（COTS）模組化方案</h2>
       <p>使用預先認證的軍規磚型模組，是確保於 10V 條件下合規的風險最低、速度最快的方式。</p>
       <ul class="plain">
@@ -648,7 +729,7 @@
     </section>
 
     <section id="checklist">
-      <p class="eyebrow">7</p>
+      <p class="eyebrow">10</p>
       <h2>方案二：分離式設計檢查清單（從零開始設計）</h2>
       <p>若從零開始以離散元件設計電路，元件須能承受 30A 冷車電流限制：</p>
 
@@ -675,7 +756,7 @@
     </section>
 
     <section id="detailed-spec">
-      <p class="eyebrow">8</p>
+      <p class="eyebrow">11</p>
       <h2>詳細分離式設計實作規格</h2>
 
       <h3>(1) 前端反向極性保護</h3>
@@ -794,7 +875,7 @@
     </section>
 
     <section id="takeaways">
-      <p class="eyebrow">9</p>
+      <p class="eyebrow">12</p>
       <h2>設計須知重點清單</h2>
       <div class="takeaway-grid">
         <div class="takeaway"><span class="idx">01</span><p><strong>架構決策：</strong>輸出54V遠高於箝制後輸入電壓，不能用純buck型突波抑制器，必須是「主動保護前端 + 升壓/隔離轉換」兩級架構。</p></div>
@@ -807,120 +888,6 @@
         <div class="takeaway"><span class="idx">08</span><p><strong>同時要滿足MIL-STD-461 EMI規範：</strong>前端需多級LC差模/共模濾波，且開關頻率諧波不能超出CE102傳導發射限值——EMI濾波設計要與突波保護級整合，不能事後補救。</p></div>
         <div class="takeaway"><span class="idx">09</span><p><strong>PCB佈局是30A設計成敗關鍵：</strong>2oz銅、多層並聯、過孔堆疊、散熱過孔陣列、以及升壓開關迴路面積最小化，這些都直接影響溫升與EMI表現，不是後期可修補的細節。</p></div>
         <div class="takeaway"><span class="idx">10</span><p><strong>文件中的COTS型號與係數僅供參考起點：</strong>實際選型須依實際效率量測值、供應商最新規格與環境測試結果覆核，不能直接照抄套用到最終量產設計。</p></div>
-      </div>
-    </section>
-
-    <hr class="divider">
-
-    <p class="part-label">Part II</p>
-    <p class="part-title" style="font-family:'Noto Serif TC',serif; font-weight:700;">規範對比</p>
-    <p class="part-intro">MIL-STD-1275 是美軍地面車輛28V電力系統規範，ISO 7637 是民用車輛12V/24V系統的傳導性電氣干擾規範。兩者性質不同，但都涵蓋突波、尖峰、負載突降/啟動電壓凹陷等類似測試項目，可逐項對比。注意：現行 ISO 7637-2 只剩 Pulse 1、2a、2b、3a、3b，負載突降與啟動曲線已移到 ISO 16750-2，下面先分別介紹，再合併比較。</p>
-
-    <section id="iso-standards">
-      <p class="eyebrow">10</p>
-      <h2>先認識兩份車規：ISO 7637-2 與 ISO 16750-2</h2>
-      <p>兩份都是道路車輛的電氣標準，但分工不同。<strong>ISO 7637-2</strong> 只管電源線上的「快速瞬態」：感性負載切換、線束電感、開關彈跳造成的微秒到毫秒級脈衝，另外規定怎麼量設備自己發出的瞬態——MIL-STD-1275F 量測發出尖峰時引用的就是它（第三版）。<strong>ISO 16750-2</strong> 管的是「電氣負載環境」：工作電壓範圍、過電壓、疊加漣波、緩升緩降、瞬斷、重置、啟動曲線、負載突降、反接、接地偏移、開短路。2010 年起，原本在 ISO 7637-2 的負載突降（Pulse 5）與啟動曲線（Pulse 4）都移到 ISO 16750-2，所以兩份要一起看，才能跟 MIL-STD-1275 對比。</p>
-
-      <h3>ISO 7637-2：電源線快速瞬態</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>脈衝</th><th>模擬什麼</th><th>12V 系統 U<sub>s</sub></th><th>24V 系統 U<sub>s</sub></th><th>R<sub>i</sub>／脈寬</th><th>施打量</th></tr></thead>
-          <tbody>
-            <tr><td>Pulse 1</td><td>與設備並聯的感性負載被切斷，負向反衝</td><td class="num">−75 ～ −150V</td><td class="num">−300 ～ −600V</td><td class="num">10Ω (12V)／50Ω (24V)；2ms (12V)／1ms (24V)</td><td>500 發</td></tr>
-            <tr><td>Pulse 2a</td><td>與設備並聯的負載電流突然中斷，線束電感造成正向尖峰</td><td class="num">+37 ～ +112V</td><td class="num">+37 ～ +112V</td><td class="num">2Ω；50µs</td><td>500 發</td></tr>
-            <tr><td>Pulse 2b</td><td>點火關閉後，直流馬達慣性轉動變成發電機回灌</td><td class="num">10V</td><td class="num">20V</td><td class="num">0–0.05Ω；0.2–2s</td><td>10 發</td></tr>
-            <tr><td>Pulse 3a</td><td>開關彈跳、電弧造成的負向快速突發</td><td class="num">−112 ～ −220V</td><td class="num">−150 ～ −300V</td><td class="num">50Ω；150ns，上升 5ns</td><td>連續 1 小時</td></tr>
-            <tr><td>Pulse 3b</td><td>同上，正向</td><td class="num">+75 ～ +150V</td><td class="num">+150 ～ +300V</td><td class="num">50Ω；150ns，上升 5ns</td><td>連續 1 小時</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p style="font-size:0.84rem;color:var(--ink-muted)">範圍為常見的嚴苛等級 III–IV；實際採用哪一級由車廠規範決定。Pulse 3 以突發方式施打（每 100µs 一發，打 10ms 停 90ms）。</p>
-
-      <h3>ISO 16750-2（2023 版）：電氣負載環境</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>項目</th><th>12V 系統</th><th>24V 系統</th><th>對應 MIL-STD-1275F</th></tr></thead>
-          <tbody>
-            <tr><td>工作電壓範圍（代碼）</td><td class="num">A 6–16V、B 8–16V、C 9–16V、D 10.5–16V</td><td class="num">E 10–32V、F 16–32V、G 22–32V、H 18–32V</td><td>20–33V（含漣波）</td></tr>
-            <tr><td>長時過電壓</td><td class="num">18V，60 分鐘，T<sub>max</sub>−20K</td><td class="num">36V，60 分鐘，T<sub>max</sub>−20K</td><td>上限 33V，無長時過電壓測試</td></tr>
-            <tr><td>跨接啟動（Jump start）</td><td class="num">26V，60 秒</td><td>無</td><td>無</td></tr>
-            <tr><td>瞬態過電壓</td><td class="num">18V／400ms，5 發</td><td class="num">36V／400ms，5 發</td><td>突波 100V／50ms，5 發</td></tr>
-            <tr><td>疊加交流漣波</td><td class="num">10Hz–200kHz 掃頻，最嚴 6Vpp</td><td class="num">10Hz–200kHz 掃頻，最嚴 10Vpp</td><td>4Vpp，30Hz–5kHz</td></tr>
-            <tr><td>緩降與緩升</td><td colspan="2">從工作電壓以 0.5V/分鐘降到 0V 再升回</td><td>無</td></tr>
-            <tr><td>重置行為</td><td colspan="2">以最低工作電壓的 5% 為一階逐步降到 0V，每階至少 5 秒，回升時檢查功能</td><td>無</td></tr>
-            <tr><td>啟動曲線</td><td>依車廠選定曲線</td><td class="num">最嚴：6V／50ms 後維持 10V（疊 2Hz 漣波），10 次</td><td>IES 12V／1 秒＋冷車 16V／30 秒</td></tr>
-            <tr><td>負載突降 Test A（未抑制）</td><td class="num">79–101V，R<sub>i</sub> 0.5–4Ω，40–400ms</td><td class="num">151–202V，R<sub>i</sub> 1–8Ω，100–350ms</td><td rowspan="2">突波 100V／50ms，路徑 &lt; 50mΩ</td></tr>
-            <tr><td>負載突降 Test B（集中抑制）</td><td class="num">箝位 27／30／32／35V</td><td class="num">箝位典型 58V</td></tr>
-            <tr><td>反接</td><td class="num">−14V，60 秒</td><td class="num">−26V，60 秒</td><td>反接 33V，5 分鐘</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p style="font-size:0.84rem;color:var(--ink-muted)">負載突降 Test A 為 10 發、Test B 為 5 發，間隔皆 1 分鐘。另有接地偏移、開路、短路保護、耐壓、絕緣電阻等項目，此處未列。</p>
-
-      <div class="callout">
-        <div class="callout-label">對本案的意義</div>
-        <p style="margin:0;">跟 1275F 比，ISO 16750-2 有兩項反而更嚴：<strong>24V 啟動曲線</strong>掉到 6V（1275F 最低 12V），以及<strong>漣波</strong>到 10Vpp、掃到 200kHz（1275F 是 4Vpp、到 5kHz）。如果同一顆電源也要賣給 24V 民用或商用車隊，第二級的最低輸入電壓得從 10V 往下設計到 6V，而且升壓級控制迴路要承受更寬頻的漣波。（AI 推論）</p>
-      </div>
-      <p style="font-size:0.8rem;color:var(--ink-faint)">資料來源：ISO 為付費標準，本節數值取自 Vishay、TI 公開應用文件與測試設備商（Intepro、TestUPS）整理，未對照 ISO 原文；設計定案前請依客戶指定版本與嚴苛等級確認。</p>
-    </section>
-
-    <section id="comparison">
-      <p class="eyebrow">11</p>
-      <h2>MIL-STD-1275 vs ISO 7637-2／16750-2 逐項對比</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>項目</th><th>MIL-STD-1275（28V系統）</th><th>ISO 7637-2 ＋ ISO 16750-2（12V/24V系統）</th><th>誰較嚴苛</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>標稱電壓</td><td>28V</td><td>12V 或 24V</td><td class="verdict">1275</td></tr>
-            <tr><td>穩態電壓範圍</td><td>20~33V（含漣波；1275F 上限 33V）</td><td>ISO 16750-2：12V 系統最寬 6–16V（代碼 A），24V 系統最寬 10–32V（代碼 E）；另有 36V／60 分鐘長時過電壓（24V）</td><td class="verdict">各有嚴苛點</td></tr>
-            <tr><td>漣波</td><td>可承受注入 4Vpp，30Hz~5kHz</td><td>ISO 16750-2：10Hz–200kHz 掃頻，24V 最嚴 10Vpp、12V 最嚴 6Vpp</td><td class="verdict">16750-2較嚴苛</td></tr>
-            <tr><td>啟動/冷車電壓凹陷</td><td>1275F：初始嚙合 IES 最低 12V、最長 1 秒；冷車最低 16V、最長 30 秒</td><td>ISO 16750-2（舊版 ISO 7637-2 Pulse 4）：24V 系統最嚴 6V／50ms 後維持 10V，疊 2Hz 漣波，10 次</td><td class="verdict">16750-2較深</td></tr>
-            <tr><td>突波（Surge）</td><td>+100V／50ms，包絡線性降到 500ms 時 33V；測試 5 發間隔 5 秒（1275F Figure 8、Table II）</td><td>負載突降 2010 年起從 ISO 7637-2 移到 ISO 16750-2：Test A（未抑制）24V 系統 151–202V、R<sub>i</sub> 1–8Ω、100–350ms；12V 系統 79–101V、0.5–4Ω、40–400ms；10 發、每分鐘一發</td><td class="verdict">類型不同</td></tr>
-            <tr><td>尖峰（Spike）</td><td>±250V，上升 ≤50ns，振盪 20~500kHz，單發 ≤200mJ，各極性至少 50 發</td><td>ISO 7637-2 Pulse 1／2a／2b／3a／3b：24V Pulse 1 可到 −600V、3a／3b 到 ±300V，但源阻抗 50Ω、脈寬 1ms／150ns，能量很小</td><td class="verdict">1275能量較大</td></tr>
-            <tr><td>反向極性</td><td>反接 33VDC 持續 5 分鐘，反接電流 ≤ 正常工作電流，接回後須正常運作</td><td>ISO 16750-2：12V 系統 −14V、24V 系統 −26V，各 60 秒</td><td class="verdict">1275較嚴苛</td></tr>
-            <tr><td>EMI/傳導發射</td><td>另有MIL-STD-461（CE102等），通常與1275併行要求</td><td>另有CISPR 25 / ISO 11452系列</td><td class="verdict">461更嚴</td></tr>
-            <tr><td>環境應力</td><td>常與MIL-STD-810併行，溫度範圍更寬（-40°C~+85°C以上）、振動衝擊更嚴苛</td><td>通常對應ISO 16750系列，範圍相對較窄</td><td class="verdict">1275更嚴苛</td></tr>
-            <tr><td>驗證/認證流程</td><td>軍方採購要求完整SOA分析、DO文件、第三方測試報告，流程冗長</td><td>車廠OEM企業規範（GMW3172、Ford ES-XW7T等），流程相對標準化</td><td class="verdict">1275負擔更重</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="verdict">
-      <p class="eyebrow">12</p>
-      <h2>結論：哪個比較困難？</h2>
-      <div class="verdict-banner">MIL-STD-1275 整體上比 ISO 7637 <strong>更困難</strong>。</div>
-      <p style="font-size:0.9rem;color:var(--ink-muted)">把 ISO 16750-2 一起納入後要修正一點：1275 難在<strong>突波（低阻抗源）、尖峰能量、反接</strong>與規範疊加的驗證負擔；但 24V 車規的<strong>啟動曲線（低到 6V）</strong>與<strong>漣波（10Vpp、到 200kHz）</strong>反而比 1275 嚴。同時要過兩邊的設計，輸入下限與迴路頻寬要以車規為準。（AI 推論）</p>
-
-      <div class="reason-grid">
-        <div class="reason-card">
-          <div class="reason-num">01</div>
-          <h4>電壓能量等級更高</h4>
-          <p>±250V尖峰、100V/50ms突波；本案（54V/240W）MOSFET的SOA壓力（463W瞬間功耗）很重。要注意的是 24V 未抑制負載突降（ISO 16750-2 Test A）峰值可到 202V，比 1275 的 100V 還高，但源阻抗 1–8Ω、能量能用 TVS 吸收；1275 的突波來自低阻抗源，TVS 吸收不了，只能主動箝制——難在類型，不只在數字。（AI 推論）</p>
-        </div>
-        <div class="reason-card">
-          <div class="reason-num">02</div>
-          <h4>反向極性要求更真實</h4>
-          <p>1275F 要求反接 33V 持續 5 分鐘不損壞，且反接電流不得超過正常工作電流，這比ISO7637 Pulse1的感性負載瞬態更難用簡單TVS二極體解決，往往需要主動理想二極體電路（如LM74700-Q1方案）。</p>
-        </div>
-        <div class="reason-card">
-          <div class="reason-num">03</div>
-          <h4>規範疊加驗證負擔</h4>
-          <p>必須與MIL-STD-461（EMI）、MIL-STD-810（環境）綁在一起驗證，整個專案驗證負擔遠高於車用ISO7637+CISPR25+ISO16750的組合，軍規測試方法更嚴格、允收裕度更小。</p>
-        </div>
-        <div class="reason-card">
-          <div class="reason-num">04</div>
-          <h4>供應鏈與元件現成度</h4>
-          <p>ISO7637市場成熟，車規TVS、突波抑制IC選擇多、已針對40V以下量身優化；MIL-STD-1275需要的耐壓等級（100V/150V甚至更高）元件選擇少、成本高、業界經驗較少。</p>
-        </div>
-      </div>
-
-      <p style="font-size:0.86rem; color:var(--ink-muted); margin-top:1.6rem;">簡言之：如果只比較單一脈衝的電壓峰值，1275的±250V尖峰與100V/50ms突波在數字上就已經比ISO7637大多數脈衝更硬；再疊加軍規特有的反向電池、EMI（461）、環境（810）要求與驗證流程，MIL-STD-1275 對54V/240W電源的設計挑戰明顯高於單純滿足ISO7637的車用電源。</p>
-
-      <div class="callout" style="margin-top:1.2rem;">
-        <p style="margin:0; font-size:0.82rem; color:var(--ink-muted);">註：ISO 7637各Pulse的確切數值依系統電壓等級（12V/24V）與OEM選定的嚴苛等級（Severity Level I~IV）而不同，設計前應對照客戶指定的確切版本與等級核實數值，上表為代表性量級對比。2026-10-22 補充：ISO 標準為付費文件，本頁 ISO 數值取自 Vishay、TI 等公開應用文件，未對照 ISO 原文。</p>
       </div>
     </section>
 
@@ -1048,6 +1015,21 @@
     });
   }
   bind([['pc-i', ' A', 0], ['pc-oz', ' oz', 0], ['pc-dt', ' °C', 0], ['pc-n', ' 層', 0], ['pc-d', ' mm', 2], ['pc-pl', ' µm', 0]], pcb);
+
+  /* top nav: highlight the section in view */
+  const navLinks = [...document.querySelectorAll('.topnav a[href^="#"]')];
+  const byId = new Map(navLinks.map(a => [a.getAttribute('href').slice(1), a]));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        navLinks.forEach(a => a.classList.remove('on'));
+        const a = byId.get(e.target.id);
+        if (a) { a.classList.add('on'); const nav = a.parentElement; if (nav.scrollWidth > nav.clientWidth) nav.scrollLeft = a.offsetLeft - nav.clientWidth / 3; }
+      });
+    }, { rootMargin: '-15% 0px -75% 0px' });
+    byId.forEach((_, id) => { const sec = document.getElementById(id); if (sec) io.observe(sec); });
+  }
 
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { stress(); pcb(); }, 120); });
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { stress(); pcb(); });
