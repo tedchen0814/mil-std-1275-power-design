@@ -216,7 +216,7 @@
   /* ---------- Stat cards ---------- */
   .stat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1rem;
     margin: 1.2rem 0;
   }
@@ -399,6 +399,7 @@
     <div class="meta-row">
       <span><strong>作者</strong> Ted Chen</span>
       <span><strong>日期</strong> 2026-08-28</span>
+      <span><strong>更新</strong> 2026-10-22 依 MIL-STD-1275F 原文校正</span>
       <span><strong>來源</strong> Obsidian_Ted · MIL-STD-1275 (54V 240W).md</span>
     </div>
   </div>
@@ -440,6 +441,10 @@
       <h2>為什麼需要兩級式架構</h2>
       <p>設計一個符合 MIL-STD-1275 規範（標稱輸入 28V）、輸出 240W、54V 的電源供應器，需要特殊的拓撲架構。由於輸出電壓（54V）遠高於最差情況下被箝制的輸入電壓（約 34V 至 40V），因此無法使用標準的純降壓型主動突波抑制器（active surge stopper）。</p>
       <p>架構必須結合「主動前端保護級」與「升壓型（Boost 或隔離式全橋/半橋）轉換器級」。</p>
+      <div class="callout">
+        <div class="callout-label">規範版本</div>
+        <p style="margin:0; font-size:0.9rem;">本頁數值以現行版 <strong>MIL-STD-1275F（2022-09-07）</strong> 原文為準。初版（2026-08-28）依 E 版二手資料撰寫，2026-10-22 已校正尖峰能量、反接測試、冷車持續時間、突波源阻抗等數值。</p>
+      </div>
     </section>
 
     <section id="architecture">
@@ -473,10 +478,10 @@
 
       <h3>第1級：前端主動保護</h3>
       <ul class="plain">
-        <li><strong>目的：</strong>吸收 ±250V（70µs）突波，並將 +100V（50ms）突波箝制到下游轉換器可承受的安全電位。</li>
+        <li><strong>目的：</strong>吸收 ±250V 尖峰（上升 ≤ 50ns、單發能量上限 200mJ），並將 +100V（50ms）突波箝制到下游轉換器可承受的安全電位。</li>
         <li><strong>實作方式：</strong>使用高壓突波抑制器 IC（如 <span class="mono">Analog Devices LTC4366</span> 或 <span class="mono">LT4363</span>）驅動外部 N 通道 MOSFET。</li>
         <li><strong>箝制目標：</strong>突波期間將第1級輸出電壓箝制在 34V 或 36V。</li>
-        <li><strong>反向極性保護：</strong>在輸入端最前方以串聯理想二極體（ideal-diode）MOSFET 控制器實現 -28V 反向極性阻擋，避免二極體持續導通造成高損耗。</li>
+        <li><strong>反向極性保護：</strong>在輸入端最前方以串聯理想二極體（ideal-diode）MOSFET 控制器做反接阻擋，避免二極體持續導通造成高損耗。MIL-STD-1275F 的反接測試是反接 33 VDC 持續 5 分鐘，反接電流不得超過正常工作電流，接回後須正常運作。</li>
       </ul>
 
       <h3>第2級：升壓型 DC-DC 轉換器（240W）</h3>
@@ -502,12 +507,18 @@
           <div class="stat-label">冷車啟動電流</div>
           <div class="stat-value">28.2A</div>
           <div class="stat-formula">240W ÷ (10V × 0.85)</div>
-          <div class="stat-note">10V–12V 凹陷，持續長達 1 秒</div>
+          <div class="stat-note">以 10V 設計，比規範 IES 最低 12V／1 秒更保守</div>
+        </div>
+        <div class="stat-card warn">
+          <div class="stat-label">冷車持續電流</div>
+          <div class="stat-value">16.7A</div>
+          <div class="stat-formula">240W ÷ (16V × 0.9)</div>
+          <div class="stat-note">1275F 冷車最低 16V，持續 30 秒</div>
         </div>
       </div>
       <div class="callout tint">
         <div class="callout-label">設計影響</div>
-        <p style="margin:0;">第1級保護 MOSFET、輸入電感、第2級開關元件必須能在冷車期間承受連續 <strong class="hl">30A</strong> 電流而不飽和或過熱。</p>
+        <p style="margin:0;">第1級保護 MOSFET、輸入電感、第2級開關元件必須能在冷車期間承受連續 <strong class="hl">30A</strong> 電流而不飽和或過熱。另外要用 16.7A 持續 30 秒評估穩態溫升——峰值條件只有 1 秒，長時間冷車才是決定散熱與電感溫升的條件。效率 0.9 為假設值。</p>
       </div>
     </section>
 
@@ -520,6 +531,10 @@
         <p style="font-size:1rem; margin-bottom:0.3rem;"><span class="mono">36V 箝制匯流排電流 = 240W / (36V × 0.92) ≈ 7.24A</span></p>
         <p style="font-family:'IBM Plex Mono',monospace; font-size:2rem; font-weight:600; margin:0.3rem 0 0.6rem;">≈ 463W</p>
         <p style="margin:0; font-size:0.92rem;">50 毫秒內 463W 的線性功耗，很快會超出單顆標準 MOSFET 的安全工作區（SOA），導致其燒毀。</p>
+      </div>
+      <div class="callout tint">
+        <div class="callout-label">對照 1275F 測試條件</div>
+        <p style="margin:0;">MIL-STD-1275F Table II：V<sub>NOM</sub> 30V、V<sub>PEAK</sub> 100V、上升 1–10ms、源阻抗 <strong>500mΩ</strong>、<strong>5 發，間隔 5 秒</strong>。463W 假設 100V 是理想電壓源；7.24A 在 500mΩ 上會掉約 3.6V，實際功耗約 437W，原算法偏保守。真正要多算的是 5 發連續造成的累積溫升。</p>
       </div>
       <h3>解決方案</h3>
       <ol class="plain">
@@ -685,11 +700,11 @@
           </thead>
           <tbody>
             <tr><td>標稱電壓</td><td>28V</td><td>12V 或 24V</td><td class="verdict">1275</td></tr>
-            <tr><td>穩態電壓範圍</td><td>約20~33V（依版本，1275E常見22~30V）</td><td>約9~16V（12V系統）</td><td class="verdict">1275</td></tr>
-            <tr><td>啟動/冷車電壓凹陷</td><td>可降至約12V甚至更低，持續長達0.05~1.5秒，恢復曲線較緩</td><td>Pulse 4：12V系統可降至約4.5~6V，通常伴隨明確恢復斜率曲線</td><td class="verdict">各有嚴苛點</td></tr>
-            <tr><td>突波（Surge）</td><td>+100V，持續50ms（規範標準值，須測到底）</td><td>Pulse 5 Load Dump：未抑制可達35~100V+，持續40~400ms，ISO 7637中能量最高</td><td class="verdict">相近量級</td></tr>
-            <tr><td>尖峰（Spike）</td><td>±250V，70µs，衰減震盪波形（100kHz）</td><td>Pulse 1/2a/2b/3a/3b：多在±50~150V範圍</td><td class="verdict">1275較嚴苛</td></tr>
-            <tr><td>反向極性</td><td>通常要求可承受-28V（全反向電池極性）而不損壞</td><td>Pulse 1 為感性負載斷開的負向瞬態，非全反向電池情境</td><td class="verdict">1275更真實</td></tr>
+            <tr><td>穩態電壓範圍</td><td>20~33V（含漣波；1275F 上限 33V）；可承受注入漣波 4Vpp、30Hz~5kHz</td><td>約9~16V（12V系統）</td><td class="verdict">1275</td></tr>
+            <tr><td>啟動/冷車電壓凹陷</td><td>1275F：初始嚙合 IES 最低 12V、最長 1 秒；冷車最低 16V、最長 30 秒</td><td>Pulse 4：12V系統可降至約4.5~6V，通常伴隨明確恢復斜率曲線</td><td class="verdict">各有嚴苛點</td></tr>
+            <tr><td>突波（Surge）</td><td>+100V／50ms，源阻抗 500mΩ，5 發間隔 5 秒（1275F Table II）</td><td>Pulse 5 Load Dump：未抑制可達35~100V+，持續40~400ms，ISO 7637中能量最高</td><td class="verdict">相近量級</td></tr>
+            <tr><td>尖峰（Spike）</td><td>±250V，上升 ≤50ns，振盪 20~500kHz，單發 ≤200mJ，各極性至少 50 發</td><td>Pulse 1/2a/2b/3a/3b：多在±50~150V範圍</td><td class="verdict">1275較嚴苛</td></tr>
+            <tr><td>反向極性</td><td>反接 33VDC 持續 5 分鐘，反接電流 ≤ 正常工作電流，接回後須正常運作</td><td>Pulse 1 為感性負載斷開的負向瞬態，非全反向電池情境</td><td class="verdict">1275更真實</td></tr>
             <tr><td>EMI/傳導發射</td><td>另有MIL-STD-461（CE102等），通常與1275併行要求</td><td>另有CISPR 25 / ISO 11452系列</td><td class="verdict">461更嚴</td></tr>
             <tr><td>環境應力</td><td>常與MIL-STD-810併行，溫度範圍更寬（-40°C~+85°C以上）、振動衝擊更嚴苛</td><td>通常對應ISO 16750系列，範圍相對較窄</td><td class="verdict">1275更嚴苛</td></tr>
             <tr><td>驗證/認證流程</td><td>軍方採購要求完整SOA分析、DO文件、第三方測試報告，流程冗長</td><td>車廠OEM企業規範（GMW3172、Ford ES-XW7T等），流程相對標準化</td><td class="verdict">1275負擔更重</td></tr>
@@ -712,7 +727,7 @@
         <div class="reason-card">
           <div class="reason-num">02</div>
           <h4>反向極性要求更真實</h4>
-          <p>1275常要求承受全反向28V電池接反情境，這比ISO7637 Pulse1的感性負載瞬態更難用簡單TVS二極體解決，往往需要主動理想二極體電路（如LM74700-Q1方案）。</p>
+          <p>1275F 要求反接 33V 持續 5 分鐘不損壞，且反接電流不得超過正常工作電流，這比ISO7637 Pulse1的感性負載瞬態更難用簡單TVS二極體解決，往往需要主動理想二極體電路（如LM74700-Q1方案）。</p>
         </div>
         <div class="reason-card">
           <div class="reason-num">03</div>
@@ -736,6 +751,6 @@
   </main>
 
   <footer class="doc-footer">
-    原文：Obsidian_Ted vault ·「MIL-STD-1275 (54V 240W).md」　｜　Ted Chen · Getac 研發部門　｜　整理生成 2026-08-28
+    原文：Obsidian_Ted vault ·「MIL-STD-1275 (54V 240W).md」　｜　Ted Chen · Getac 研發部門　｜　整理生成 2026-08-28　｜　2026-10-22 依 MIL-STD-1275F（2022-09-07）官方原文校正
   </footer>
 </div>
